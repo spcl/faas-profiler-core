@@ -1,0 +1,7 @@
+# AWS SDK
+boto3
+
+# Data management
+marshmallow
+marshmallow_enum
+marshmallow_dataclass
