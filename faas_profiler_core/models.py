@@ -14,7 +14,7 @@ import marshmallow_dataclass
 from marshmallow import ValidationError, fields
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Callable
 from uuid import UUID
 
 from .constants import (
@@ -99,7 +99,7 @@ Function Context
 
 
 @dataclass
-class FunctionContext:
+class FunctionContext(BaseModel):
     """
     Context definition for serverless functions.
     """
@@ -121,7 +121,7 @@ Tracing Context
 
 
 @dataclass
-class TracingContext:
+class TracingContext(BaseModel):
     """
     Context definition for tracing
     """
@@ -142,21 +142,14 @@ class BoundContext(BaseModel):
     provider: Provider
     service: ServiceType
     operation: OperationType
-    identifier: dict
+    identifier: dict = field(default_factory=dict)
+    tags: dict = field(default_factory=dict, metadata=dict(load_only=True))
 
     def set_identifier(self, key: Any, value: Any) -> None:
         """
         Sets a new context identifier
         """
         self.identifier[key] = value
-
-@dataclass
-class InboundContext(BoundContext):
-    """
-    Context definition for inbound requests
-    """
-    trigger_synchronicity: TriggerSynchronicity = TriggerSynchronicity.UNIDENTIFIED
-    tags: dict = field(default_factory=dict)
 
     def set_tags(self, tags: dict) -> None:
         """
@@ -165,16 +158,42 @@ class InboundContext(BoundContext):
         self.tags.update(tags)
 
 @dataclass
+class InboundContext(BoundContext):
+    """
+    Context definition for inbound requests
+    """
+    trigger_synchronicity: TriggerSynchronicity = TriggerSynchronicity.UNIDENTIFIED
+
+@dataclass
 class OutboundContext(BoundContext):
     """
     Context definition for outbound requests
     """
-    invoked_at: datetime
-    finished_at: datetime
+    invoked_at: datetime = None
+    finished_at: datetime = None
 
     has_error: bool = False
     error_message: str = ""
 
+    @property
+    def instance(self) -> Any:
+        return self.tags.get("_instance")
+
+    @property
+    def function(self) -> Any:
+        return self.tags.get("_function")
+
+    @property
+    def args(self) -> Any:
+        return self.tags.get("_args")
+
+    @property
+    def kwargs(self) -> Any:
+        return self.tags.get("_kwargs")
+
+    @property
+    def response(self) -> Any:
+        return self.tags.get("_response")
 
 """
 Trace Record
