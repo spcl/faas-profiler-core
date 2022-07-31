@@ -16,6 +16,7 @@ from datetime import datetime
 from boto3.dynamodb.types import TypeSerializer, TypeDeserializer
 from botocore.exceptions import ClientError
 
+from .logging import Loggable
 from .models import InboundContext, TracingContext, OutboundContext
 from .constants import Provider
 
@@ -34,7 +35,7 @@ def make_identifier_key(
 
     return identifier_delimiter.join(identifier)
 
-class OutboundRequestTable(ABC):
+class OutboundRequestTable(ABC, Loggable):
     """
     Base class for a outbound request table.
     """
@@ -78,6 +79,12 @@ class NoopOutboundRequestTable(OutboundRequestTable):
         self.logger.warn(
             "Skipping recording outbound request. No outbound request table defined.")
 
+
+    def find_request(
+        self,
+        inbound_context: Type[InboundContext]
+    ) -> Type[TracingContext]:
+        pass
 
 class AWSOutboundRequestTable(OutboundRequestTable):
     """
