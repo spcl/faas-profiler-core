@@ -5,8 +5,6 @@ Outbound requests handleing.
 """
 
 import boto3
-import json
-import decimal
 
 from typing import Type
 from abc import ABC, abstractmethod
@@ -53,7 +51,7 @@ class OutboundRequestTable(ABC, Loggable):
     @abstractmethod
     def store_request(
         self,
-        invocation_context: Type[OutboundContext],
+        outbound_context: Type[OutboundContext],
         trace_context: Type[TracingContext]
     ) -> None:
         pass
@@ -73,7 +71,7 @@ class NoopOutboundRequestTable(OutboundRequestTable):
 
     def store_request(
         self,
-        invocation_context: Type[OutboundContext],
+        outbound_context: Type[OutboundContext],
         trace_context: Type[TracingContext]
     ) -> None:
         self.logger.warn(
@@ -106,32 +104,34 @@ class AWSOutboundRequestTable(OutboundRequestTable):
 
     def store_request(
         self,
-        invocation_context: Type[OutboundContext],
+        outbound_context: Type[OutboundContext],
         trace_context: Type[TracingContext]
     ) -> None:
         """
         Stores the invocation the dynamodb table
         """
-        request_id = uuid4()
+        if not outbound_context.identifier:
+            raise RuntimeError(
+                f"Cannot find inbound record without identifier")
+
+        identifier_key = make_identifier_key(outbound_context.identifier)
         record = {
-            **invocation_context.to_record(),
-            "outbound_request_id": str(request_id),
-            "timestamp": datetime.timestamp(invocation_context.invoked_at),
+            "identifier_key": identifier_key,
+            "invoked_at": outbound_context.invoked_at.isoformat(),
             "trace_id": str(trace_context.trace_id),
-            "invocation_id": str(trace_context.invocation_id)
+            "record_id": str(trace_context.invocation_id)
         }
-        item = json.loads(json.dumps(record), parse_float=decimal.Decimal)
         item = {
             k: self.serializer.serialize(v) for k,
-            v in item.items() if v != ""}
+            v in record.items() if v != ""}
         try:
             self.dynamodb.put_item(TableName=self.table_name, Item=item)
         except ClientError as err:
             self.logger.info(
-                f"Failed to record outbound request {request_id} in {self.table_name}: {err}")
+                f"Failed to record outbound request {identifier_key} in {self.table_name}: {err}")
         else:
             self.logger.info(
-                f"Successfully recorded outbound request {request_id} in {self.table_name}")
+                f"Successfully recorded outbound request {identifier_key} in {self.table_name}")
 
 
     def find_request(
