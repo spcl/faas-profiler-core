@@ -8,7 +8,6 @@ import boto3
 
 from typing import Type
 from abc import ABC, abstractmethod
-from uuid import uuid4
 from datetime import datetime
 
 from boto3.dynamodb.types import TypeSerializer, TypeDeserializer
@@ -119,7 +118,7 @@ class AWSOutboundRequestTable(OutboundRequestTable):
             "identifier_key": identifier_key,
             "invoked_at": outbound_context.invoked_at.isoformat(),
             "trace_id": str(trace_context.trace_id),
-            "record_id": str(trace_context.invocation_id)
+            "record_id": str(trace_context.record_id)
         }
         item = {
             k: self.serializer.serialize(v) for k,
