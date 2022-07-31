@@ -144,6 +144,11 @@ class BoundContext(BaseModel):
     operation: OperationType
     identifier: dict
 
+    def set_identifier(self, key: Any, value: Any) -> None:
+        """
+        Sets a new context identifier
+        """
+        self.identifier[key] = value
 
 @dataclass
 class InboundContext(BoundContext):
@@ -153,6 +158,11 @@ class InboundContext(BoundContext):
     trigger_synchronicity: TriggerSynchronicity = TriggerSynchronicity.UNIDENTIFIED
     tags: dict = field(default_factory=dict)
 
+    def set_tags(self, tags: dict) -> None:
+        """
+        Merges tags into stored tags
+        """
+        self.tags.update(tags)
 
 @dataclass
 class OutboundContext(BoundContext):
