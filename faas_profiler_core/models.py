@@ -11,7 +11,7 @@ Models and Schemas:
 
 import marshmallow_dataclass
 
-from marshmallow import ValidationError, fields
+from marshmallow import EXCLUDE, ValidationError, fields
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, List, Optional, Callable
@@ -91,6 +91,9 @@ class BaseModel:
         """
         schema = marshmallow_dataclass.class_schema(self.__class__)()
         return schema.dump(self)
+
+    class Meta:
+        unknown = EXCLUDE
 
 
 """
@@ -206,5 +209,3 @@ class TraceRecord(BaseModel):
     tracing_context: Optional[TracingContext]
     inbound_context: Optional[InboundContext]
     outbound_contexts: List[OutboundContext] = field(default_factory=list)
-
-    recorded_at: datetime = datetime.now()

@@ -100,6 +100,7 @@ class AWSOutboundRequestTable(OutboundRequestTable):
 
         self.dynamodb = boto3.client('dynamodb', region_name=self.region_name)
         self.serializer = TypeSerializer()
+        self.deserializer = TypeDeserializer()
 
     def store_request(
         self,
@@ -153,6 +154,17 @@ class AWSOutboundRequestTable(OutboundRequestTable):
                 ":v2": {"S": str(datetime.now().isoformat())},
             })
 
-        print(response.get("Items"))
+        if "Items" in response and len(response["Items"]) > 0:
+            if len(response["Items"]) != 1:
+                raise RuntimeError(
+                    f"Could not find unique inbound request for {identifier_key}")
 
-        # breakpoint()
+            trace_data = {
+                k: self.deserializer.deserialize(v) for k, v in response["Items"][0].items()}
+            
+            return TracingContext.load({
+                "trace_id": trace_data.get("trace_id"),
+                "record_id": trace_data.get("record_id")
+            })
+
+        return None
