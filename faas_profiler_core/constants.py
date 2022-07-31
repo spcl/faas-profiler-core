@@ -64,12 +64,30 @@ class TriggerSynchronicity(Enum):
     SYNC = "sync"
 
 
+
+"""
+Base Service, Operation and Region
+"""
+
+class UnidentifiedService(Service):
+    """
+    Default service for unidentified services.
+    """
+    UNIDENTIFIED = 'unidentified'
+
+
+class UnidentifiedOperation(Operation):
+    """
+    Default service for unidentified services.
+    """
+    UNIDENTIFIED = 'unidentified'
+
 """
 Amazon Web Services - Services, Operations and Regions
 """
 
 
-class AWSServices(Service):
+class AWSService(Service):
     """
     Enumeration of different AWS services
     """
@@ -120,3 +138,18 @@ class AWSRegion(Region):
     Enumeration of different AWS Regions
     """
     EU_CENTRAL = "eu-central-1"
+
+
+
+def service_proxy(provider: Provider) -> Service:
+    if provider == provider.AWS:
+        return AWSService
+    else:
+        return UnidentifiedService
+
+
+def operation_proxy(provider: Provider) -> Operation:
+    if provider == provider.AWS:
+        return AWSOperation
+    else:
+        return UnidentifiedOperation
