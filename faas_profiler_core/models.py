@@ -11,20 +11,64 @@ Models and Schemas:
 
 import marshmallow_dataclass
 
+from marshmallow import ValidationError, fields
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, List, Optional
 from uuid import UUID
 
 from .constants import (
-    AWSOperation,
-    AWSServices,
     Provider,
-    Service,
-    Operation,
     Runtime,
-    TriggerSynchronicity
+    TriggerSynchronicity,
+    operation_proxy,
+    service_proxy
 )
+
+"""
+Custom Fields and Types
+"""
+
+class ServiceProxy(fields.Field):
+    """
+    Proxy for service fields based on the provider
+    """
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        return value.value
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        try:
+            provider = Provider[data.get("provider")]
+            service = service_proxy(provider)
+            
+            return service(value)
+        except Exception as error:
+            raise ValidationError(str(error)) from error
+       
+    
+ServiceType = marshmallow_dataclass.NewType("ServiceType", str, field=ServiceProxy)
+
+
+class OperationProxy(fields.Field):
+    """
+    Proxy for operatiom fields based on the provider
+    """
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        return value.value
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        try:
+            provider = Provider[data.get("provider")]
+            operation = operation_proxy(provider)
+            
+            return operation(value)
+        except Exception as error:
+            raise ValidationError(str(error)) from error
+       
+    
+OperationType = marshmallow_dataclass.NewType("OperationType", str, field=OperationProxy)
 
 
 @dataclass
@@ -87,45 +131,39 @@ class TracingContext:
 
 
 """
-Inbound Context
+Inbound and Outbound Context
 """
+
+@dataclass
+class BoundContext(BaseModel):
+    """
+    Base class for inbound and outbound context.
+    """
+    provider: Provider
+    service: ServiceType
+    operation: OperationType
+    identifier: dict
 
 
 @dataclass
-class InboundContext:
+class InboundContext(BoundContext):
     """
     Context definition for inbound requests
     """
-    provider: Provider
-    service: AWSServices
-    operation: AWSOperation
     trigger_synchronicity: TriggerSynchronicity = TriggerSynchronicity.UNIDENTIFIED
-
-    identifier: dict = field(default_factory=dict)
     tags: dict = field(default_factory=dict)
 
 
-"""
-Outbound Context
-"""
-
-
 @dataclass
-class OutboundContext:
+class OutboundContext(BoundContext):
     """
     Context definition for outbound requests
     """
-    provider: Provider
-    service: AWSServices
-    operation: AWSOperation
-
     invoked_at: datetime
     finished_at: datetime
 
     has_error: bool = False
     error_message: str = ""
-
-    identifier: dict = field(default_factory=dict)
 
 
 """
