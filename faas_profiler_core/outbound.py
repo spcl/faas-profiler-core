@@ -149,6 +149,8 @@ class AWSOutboundRequestTable(OutboundRequestTable):
         response = self.dynamodb.query(
             TableName=self.table_name,
             KeyConditionExpression="identifier_key = :v1 AND invoked_at <= :v2",
+            Limit=1,
+            ScanIndexForward=False,
             ExpressionAttributeValues={
                 ":v1": {"S": identifier_key},
                 ":v2": {"S": str(datetime.now().isoformat())},
