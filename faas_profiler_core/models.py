@@ -22,7 +22,10 @@ from .constants import (
     Runtime,
     TriggerSynchronicity,
     operation_proxy,
-    service_proxy
+    service_proxy,
+    TRACE_ID_HEADER,
+    INVOCATION_ID_HEADER,
+    PARENT_ID_HEADER
 )
 
 """
@@ -131,6 +134,20 @@ class TracingContext(BaseModel):
     trace_id: UUID
     record_id: UUID
     parent_id: UUID = None
+    
+    def to_injectable(self) -> dict:
+        """
+        Returns the context as injectable context.
+        """
+        ctx = {}
+        if self.trace_id:
+            ctx[TRACE_ID_HEADER] = str(self.trace_id)
+        if self.record_id:
+            ctx[INVOCATION_ID_HEADER] = str(self.record_id)
+        if self.parent_id:
+            ctx[PARENT_ID_HEADER] = str(self.parent_id)
+
+        return ctx
 
 
 """
