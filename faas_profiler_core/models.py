@@ -14,7 +14,7 @@ import marshmallow_dataclass
 from marshmallow import EXCLUDE, ValidationError, fields
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, List, Optional, Callable
+from typing import Any, List, Optional
 from uuid import UUID
 
 from .constants import (
@@ -112,10 +112,10 @@ class FunctionContext(BaseModel):
     function_name: str
     handler: str
 
-    # invoked_at: Type[datetime]
-    # handler_executed_at = Type[datetime]
-    # handler_finished_at = Type[datetime]
-    # finished_at = Type[datetime]
+    invoked_at: datetime = None
+    handler_executed_at: datetime = None
+    handler_finished_at: datetime = None
+    finished_at: datetime = None
 
 
 """
