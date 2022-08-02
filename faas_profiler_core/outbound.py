@@ -17,6 +17,7 @@ from .logging import Loggable
 from .models import InboundContext, TracingContext, OutboundContext
 from .constants import Provider
 
+
 def make_identifier_key(
     identifier: dict,
     key_value_delimiter: str = "#",
@@ -26,11 +27,12 @@ def make_identifier_key(
     Makes a identifier key.
     Sorts the keys descending and joins the key values with #.
     """
-    identifier = {str(k): str(v) for k,v in identifier.items()}
+    identifier = {str(k): str(v) for k, v in identifier.items()}
     identifier = sorted(identifier.items(), key=lambda x: x[1], reverse=False)
     identifier = map(lambda id: key_value_delimiter.join(id), identifier)
 
     return identifier_delimiter.join(identifier)
+
 
 class OutboundRequestTable(ABC, Loggable):
     """
@@ -55,13 +57,13 @@ class OutboundRequestTable(ABC, Loggable):
     ) -> None:
         pass
 
-    
     @abstractmethod
     def find_request(
         self,
         inbound_context: Type[InboundContext]
     ) -> Type[TracingContext]:
         pass
+
 
 class NoopOutboundRequestTable(OutboundRequestTable):
     """
@@ -76,12 +78,12 @@ class NoopOutboundRequestTable(OutboundRequestTable):
         self.logger.warn(
             "Skipping recording outbound request. No outbound request table defined.")
 
-
     def find_request(
         self,
         inbound_context: Type[InboundContext]
     ) -> Type[TracingContext]:
         pass
+
 
 class AWSOutboundRequestTable(OutboundRequestTable):
     """
@@ -112,7 +114,7 @@ class AWSOutboundRequestTable(OutboundRequestTable):
         """
         if not outbound_context.identifier:
             raise RuntimeError(
-                f"Cannot find inbound record without identifier")
+                "Cannot find inbound record without identifier")
 
         identifier_key = make_identifier_key(outbound_context.identifier)
         record = {
@@ -133,7 +135,6 @@ class AWSOutboundRequestTable(OutboundRequestTable):
             self.logger.info(
                 f"Successfully recorded outbound request {identifier_key} in {self.table_name}")
 
-
     def find_request(
         self,
         inbound_context: Type[InboundContext]
@@ -143,8 +144,8 @@ class AWSOutboundRequestTable(OutboundRequestTable):
         """
         if not inbound_context.identifier:
             raise RuntimeError(
-                f"Cannot find inbound record without identifier")
-        
+                "Cannot find inbound record without identifier")
+
         identifier_key = make_identifier_key(inbound_context.identifier)
         response = self.dynamodb.query(
             TableName=self.table_name,
@@ -152,8 +153,11 @@ class AWSOutboundRequestTable(OutboundRequestTable):
             Limit=1,
             ScanIndexForward=False,
             ExpressionAttributeValues={
-                ":v1": {"S": identifier_key},
-                ":v2": {"S": str(datetime.now().isoformat())},
+                ":v1": {
+                    "S": identifier_key},
+                ":v2": {
+                    "S": str(
+                        datetime.now().isoformat())},
             })
 
         if "Items" in response and len(response["Items"]) > 0:
@@ -162,8 +166,9 @@ class AWSOutboundRequestTable(OutboundRequestTable):
                     f"Could not find unique inbound request for {identifier_key}")
 
             trace_data = {
-                k: self.deserializer.deserialize(v) for k, v in response["Items"][0].items()}
-            
+                k: self.deserializer.deserialize(v) for k,
+                v in response["Items"][0].items()}
+
             return TracingContext.load({
                 "trace_id": trace_data.get("trace_id"),
                 "record_id": trace_data.get("record_id")

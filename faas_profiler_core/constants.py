@@ -18,6 +18,7 @@ TRACE_CONTEXT_KEY = "_faas_profiler_context"
 Enums
 """
 
+
 class Runtime(Enum):
     """
     Enumeration of different runtimes.
@@ -64,10 +65,10 @@ class TriggerSynchronicity(Enum):
     SYNC = "sync"
 
 
-
 """
 Base Service, Operation and Region
 """
+
 
 class UnidentifiedService(Service):
     """
@@ -81,6 +82,7 @@ class UnidentifiedOperation(Operation):
     Default service for unidentified services.
     """
     UNIDENTIFIED = 'unidentified'
+
 
 """
 Amazon Web Services - Services, Operations and Regions
@@ -138,7 +140,6 @@ class AWSRegion(Region):
     Enumeration of different AWS Regions
     """
     EU_CENTRAL = "eu-central-1"
-
 
 
 def service_proxy(provider: Provider) -> Service:

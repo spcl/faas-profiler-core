@@ -32,6 +32,7 @@ from .constants import (
 Custom Fields and Types
 """
 
+
 class ServiceProxy(fields.Field):
     """
     Proxy for service fields based on the provider
@@ -44,13 +45,14 @@ class ServiceProxy(fields.Field):
         try:
             provider = Provider[data.get("provider")]
             service = service_proxy(provider)
-            
+
             return service(value)
         except Exception as error:
             raise ValidationError(str(error)) from error
-       
-    
-ServiceType = marshmallow_dataclass.NewType("ServiceType", str, field=ServiceProxy)
+
+
+ServiceType = marshmallow_dataclass.NewType(
+    "ServiceType", str, field=ServiceProxy)
 
 
 class OperationProxy(fields.Field):
@@ -65,13 +67,14 @@ class OperationProxy(fields.Field):
         try:
             provider = Provider[data.get("provider")]
             operation = operation_proxy(provider)
-            
+
             return operation(value)
         except Exception as error:
             raise ValidationError(str(error)) from error
-       
-    
-OperationType = marshmallow_dataclass.NewType("OperationType", str, field=OperationProxy)
+
+
+OperationType = marshmallow_dataclass.NewType(
+    "OperationType", str, field=OperationProxy)
 
 
 @dataclass
@@ -134,7 +137,7 @@ class TracingContext(BaseModel):
     trace_id: UUID
     record_id: UUID
     parent_id: UUID = None
-    
+
     def to_injectable(self) -> dict:
         """
         Returns the context as injectable context.
@@ -153,6 +156,7 @@ class TracingContext(BaseModel):
 """
 Inbound and Outbound Context
 """
+
 
 @dataclass
 class BoundContext(BaseModel):
@@ -177,12 +181,16 @@ class BoundContext(BaseModel):
         """
         self.tags.update(tags)
 
+
 @dataclass
 class InboundContext(BoundContext):
     """
     Context definition for inbound requests
     """
+    triggered_at: datetime = None
+
     trigger_synchronicity: TriggerSynchronicity = TriggerSynchronicity.UNIDENTIFIED
+
 
 @dataclass
 class OutboundContext(BoundContext):
@@ -214,6 +222,7 @@ class OutboundContext(BoundContext):
     @property
     def response(self) -> Any:
         return self.tags.get("_response")
+
 
 """
 Trace Record
