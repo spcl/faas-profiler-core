@@ -169,6 +169,8 @@ class BoundContext(BaseModel):
     identifier: dict = field(default_factory=dict)
     tags: dict = field(default_factory=dict, metadata=dict(load_only=True))
 
+    invoked_at: datetime = None
+
     def set_identifier(self, key: Any, value: Any) -> None:
         """
         Sets a new context identifier
@@ -187,8 +189,6 @@ class InboundContext(BoundContext):
     """
     Context definition for inbound requests
     """
-    triggered_at: datetime = None
-
     trigger_synchronicity: TriggerSynchronicity = TriggerSynchronicity.UNIDENTIFIED
 
 
@@ -197,7 +197,6 @@ class OutboundContext(BoundContext):
     """
     Context definition for outbound requests
     """
-    invoked_at: datetime = None
     finished_at: datetime = None
 
     has_error: bool = False
