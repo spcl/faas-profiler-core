@@ -1,0 +1,29 @@
+name: FaaS-Profiler-Core CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install FaaS-Profiler-Core for Python
+      run: python setup.py install
+    - name: Install testing requirements
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-test.txt
+    - name: Run tests
+      run: pytest tests/**
+    - name: Lint with flake8
+      run: |
+        flake8 faas_profiler_core --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 faas_profiler_core --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
