@@ -21,7 +21,7 @@ from boto3.dynamodb.types import TypeSerializer, TypeDeserializer
 from botocore.exceptions import ClientError
 
 from .logging import Loggable
-from .models import BaseModel, BoundContext, InboundContext, TracingContext, OutboundContext
+from .models import BaseModel, RequestContext, InboundContext, TracingContext, OutboundContext
 from .constants import Provider
 
 """
@@ -157,7 +157,7 @@ Record generation
 
 def make_record(
     record_type: RecordType,
-    bound_context: Type[BoundContext],
+    request_context: Type[RequestContext],
     trace_context: Type[TracingContext]
 ) -> dict:
     """
@@ -170,14 +170,14 @@ def make_record(
             "Cannot create record without tracing context."
             "Trace ID and Record ID are required.")
 
-    time_constraint = bound_context.invoked_at
+    time_constraint = request_context.invoked_at
     if time_constraint is None:
         raise InvalidContextException(
             "Cannot create record without time contraint.")
 
     record = RequestRecord(
         record_type=record_type,
-        identifier=bound_context.identifier,
+        identifier=request_context.identifier,
         time_constraint=time_constraint,
         trace_id=trace_context.trace_id,
         record_id=trace_context.record_id)

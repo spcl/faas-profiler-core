@@ -8,7 +8,7 @@ Constants
 """
 
 TRACE_ID_HEADER = "FaaS-Profiler-Trace-ID"
-INVOCATION_ID_HEADER = "FaaS-Profiler-Invocation-ID"
+RECORD_ID_HEADER = "FaaS-Profiler-Record-ID"
 PARENT_ID_HEADER = "FaaS-Profiler-Parent-ID"
 
 TRACE_CONTEXT_KEY = "_faas_profiler_context"
