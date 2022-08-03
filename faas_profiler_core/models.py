@@ -9,12 +9,15 @@ Models and Schemas:
 - TraceRecord
 """
 
+from functools import partial
 import marshmallow_dataclass
 
-from marshmallow import EXCLUDE, ValidationError, fields
+from typing import Any, List, Optional
+from marshmallow import EXCLUDE, ValidationError, fields, validate
+from marshmallow_dataclass import NewType
+from marshmallow_enum import EnumField
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, List, Optional
 from uuid import UUID
 
 from .constants import (
@@ -24,7 +27,7 @@ from .constants import (
     operation_proxy,
     service_proxy,
     TRACE_ID_HEADER,
-    INVOCATION_ID_HEADER,
+    RECORD_ID_HEADER,
     PARENT_ID_HEADER
 )
 
@@ -43,7 +46,7 @@ class ServiceProxy(fields.Field):
 
     def _deserialize(self, value, attr, data, **kwargs):
         try:
-            provider = Provider[data.get("provider")]
+            provider = Provider(data.get("provider"))
             service = service_proxy(provider)
 
             return service(value)
@@ -65,7 +68,7 @@ class OperationProxy(fields.Field):
 
     def _deserialize(self, value, attr, data, **kwargs):
         try:
-            provider = Provider[data.get("provider")]
+            provider = Provider(data.get("provider"))
             operation = operation_proxy(provider)
 
             return operation(value)
@@ -73,8 +76,7 @@ class OperationProxy(fields.Field):
             raise ValidationError(str(error)) from error
 
 
-OperationType = marshmallow_dataclass.NewType(
-    "OperationType", str, field=OperationProxy)
+OperationType = NewType("OperationType", str, field=OperationProxy)
 
 
 @dataclass
@@ -82,6 +84,9 @@ class BaseModel:
     """
     Base model with method for loading and dumping.
     """
+
+    class Meta:
+        unknown = EXCLUDE
 
     @classmethod
     def load(cls, data: Any):
@@ -98,13 +103,22 @@ class BaseModel:
         schema = marshmallow_dataclass.class_schema(self.__class__)()
         return schema.dump(self)
 
-    class Meta:
-        unknown = EXCLUDE
-
 
 """
 Function Context
 """
+
+
+ProviderType = NewType(
+    "ProviderType",
+    Provider,
+    field=partial(
+        EnumField,
+        Provider,
+        by_value=True))
+
+RuntimeType = NewType(
+    "RuntimeType", Provider, field=partial(EnumField, Runtime, by_value=True))
 
 
 @dataclass
@@ -112,11 +126,11 @@ class FunctionContext(BaseModel):
     """
     Context definition for serverless functions.
     """
-    provider: Provider
-    runtime: Runtime
+    provider: ProviderType
+    runtime: RuntimeType
 
-    function_name: str
-    handler: str
+    function_name: str = field(metadata=dict(validate=validate.Length(min=1)))
+    handler: str = field(metadata=dict(validate=validate.Length(min=1)))
 
     invoked_at: datetime = None
     handler_executed_at: datetime = None
@@ -146,7 +160,7 @@ class TracingContext(BaseModel):
         if self.trace_id:
             ctx[TRACE_ID_HEADER] = str(self.trace_id)
         if self.record_id:
-            ctx[INVOCATION_ID_HEADER] = str(self.record_id)
+            ctx[RECORD_ID_HEADER] = str(self.record_id)
         if self.parent_id:
             ctx[PARENT_ID_HEADER] = str(self.parent_id)
 
@@ -159,11 +173,11 @@ Inbound and Outbound Context
 
 
 @dataclass
-class BoundContext(BaseModel):
+class RequestContext(BaseModel):
     """
     Base class for inbound and outbound context.
     """
-    provider: Provider
+    provider: ProviderType
     service: ServiceType
     operation: OperationType
     identifier: dict = field(default_factory=dict)
@@ -185,7 +199,7 @@ class BoundContext(BaseModel):
 
 
 @dataclass
-class InboundContext(BoundContext):
+class InboundContext(RequestContext):
     """
     Context definition for inbound requests
     """
@@ -193,7 +207,7 @@ class InboundContext(BoundContext):
 
 
 @dataclass
-class OutboundContext(BoundContext):
+class OutboundContext(RequestContext):
     """
     Context definition for outbound requests
     """
