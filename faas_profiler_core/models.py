@@ -197,6 +197,14 @@ class RequestContext(BaseModel):
         """
         self.tags.update(tags)
 
+    @property
+    def resolvable(self) -> bool:
+        """
+        Returns True if request context is resolvable.
+        This is, if identifier are set.
+        """
+        return self.identifier is not None and self.identifier != {}
+
 
 @dataclass
 class InboundContext(RequestContext):
