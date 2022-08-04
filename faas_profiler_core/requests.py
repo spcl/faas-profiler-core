@@ -380,10 +380,10 @@ class AWSRequestTable(RequestTable):
         try:
             response = self.dynamodb.query(
                 TableName=self.table_name,
-                KeyConditionExpression=":part_key = :id  AND :sort_key >= :tc",
+                KeyConditionExpression="#part_key = :id  AND #sort_key >= :tc",
                 ExpressionAttributeNames={
-                    ":part_key": self.PARTITION_KEY,
-                    ":sort_key": self.SORT_KEY},
+                    "#part_key": self.PARTITION_KEY,
+                    "#sort_key": self.SORT_KEY},
                 ExpressionAttributeValues={
                     ":id": {"S": identifer},
                     ":tc": {"S": invoked_at.isoformat()}})
@@ -417,10 +417,10 @@ class AWSRequestTable(RequestTable):
         try:
             response = self.dynamodb.query(
                 TableName=self.table_name,
-                KeyConditionExpression=":part_key = :id  AND :sort_key <= :tc",
+                KeyConditionExpression="#part_key = :id  AND #sort_key <= :tc",
                 ExpressionAttributeNames={
-                    ":part_key": self.PARTITION_KEY,
-                    ":sort_key": self.SORT_KEY},
+                    "#part_key": self.PARTITION_KEY,
+                    "#sort_key": self.SORT_KEY},
                 ExpressionAttributeValues={
                     ":id": {"S": identifer},
                     ":tc": {"S": invoked_at.isoformat()}})
