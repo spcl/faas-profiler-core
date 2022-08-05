@@ -185,11 +185,11 @@ class RequestContext(BaseModel):
 
     invoked_at: datetime = None
 
-    def set_identifier(self, key: Any, value: Any) -> None:
+    def set_identifiers(self, identifiers: dict) -> None:
         """
-        Sets a new context identifier
+        Merges identifier into stored identifier
         """
-        self.identifier[key] = value
+        self.identifiers.update(identifiers)
 
     def set_tags(self, tags: dict) -> None:
         """
