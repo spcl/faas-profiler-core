@@ -189,7 +189,7 @@ class RequestContext(BaseModel):
         """
         Merges identifier into stored identifier
         """
-        self.identifiers.update(identifiers)
+        self.identifier.update(identifiers)
 
     def set_tags(self, tags: dict) -> None:
         """
