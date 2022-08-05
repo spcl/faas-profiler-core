@@ -137,6 +137,45 @@ class FunctionContext(BaseModel):
     handler_finished_at: datetime = None
     finished_at: datetime = None
 
+    @property
+    def function_key(self):
+        """
+        Returns a unique key for the function.
+        """
+        return self.provider.value + "::" + self.function_name
+
+    @property
+    def handler_execution_time(self):
+        """
+        Returns the handler execution time in ms
+        """
+        if not (self.handler_executed_at or self.handler_finished_at):
+            return
+
+        delta = self.handler_finished_at - self.handler_executed_at
+        return delta.total_seconds() * 1000
+
+    @property
+    def total_execution_time(self):
+        """
+        Returns the total executuon time in ms
+        """
+        if not (self.invoked_at or self.finished_at):
+            return
+
+        delta = self.finished_at - self.invoked_at
+        return delta.total_seconds() * 1000
+
+    @property
+    def profiler_time(self):
+        """
+        Returns the total time for the profiler (overhead)
+        """
+        if not (self.total_execution_time or self.handler_execution_time):
+            return
+
+        return self.total_execution_time - self.handler_execution_time
+
 
 """
 Tracing Context
@@ -224,26 +263,6 @@ class OutboundContext(RequestContext):
     has_error: bool = False
     error_message: str = ""
 
-    @property
-    def instance(self) -> Any:
-        return self.tags.get("_instance")
-
-    @property
-    def function(self) -> Any:
-        return self.tags.get("_function")
-
-    @property
-    def args(self) -> Any:
-        return self.tags.get("_args")
-
-    @property
-    def kwargs(self) -> Any:
-        return self.tags.get("_kwargs")
-
-    @property
-    def response(self) -> Any:
-        return self.tags.get("_response")
-
 
 """
 Trace Record
@@ -256,3 +275,33 @@ class TraceRecord(BaseModel):
     tracing_context: Optional[TracingContext]
     inbound_context: Optional[InboundContext]
     outbound_contexts: List[OutboundContext] = field(default_factory=list)
+
+    @property
+    def execution_time(self):
+        """
+        Returns the execution time of the trace in ms.
+        """
+        if self.function_context is None:
+            return
+
+        return self.function_context.total_execution_time
+
+    @property
+    def overhead_time(self):
+        """
+        Returns the overhead time spent by the profiler in ms.
+        """
+        if self.function_context is None:
+            return
+
+        return self.function_context.profiler_time
+
+    @property
+    def handler_time(self):
+        """
+        Returns the execution time of the handler in ms.
+        """
+        if self.function_context is None:
+            return
+
+        return self.function_context.handler_execution_time
