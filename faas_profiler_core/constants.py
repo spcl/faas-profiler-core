@@ -113,6 +113,9 @@ class AWSOperation(Operation):
     Enumeration of different AWS Operations
     """
     UNIDENTIFIED = 'unidentified'
+    # Lambda
+    LAMBDA_INVOKE = "invoke"
+
     # S3
     S3_OBJECT_CREATE = "ObjectCreated"  # Combines: PUT, POST, COPY
     S3_OBJECT_REMOVED = "ObjectRemoved"  # Combines: permanently and marked deleted
