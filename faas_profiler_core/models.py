@@ -10,6 +10,7 @@ Models and Schemas:
 """
 
 from functools import partial
+from unittest import result
 import marshmallow_dataclass
 
 from typing import Any, List, Optional
@@ -265,6 +266,17 @@ class OutboundContext(RequestContext):
 
 
 """
+Record data
+"""
+
+
+@dataclass
+class RecordData(BaseModel):
+    name: str
+    results: Any
+
+
+"""
 Trace Record
 """
 
@@ -275,6 +287,8 @@ class TraceRecord(BaseModel):
     tracing_context: Optional[TracingContext]
     inbound_context: Optional[InboundContext]
     outbound_contexts: List[OutboundContext] = field(default_factory=list)
+
+    data: List[RecordData] = field(default_factory=list)
 
     @property
     def execution_time(self):
