@@ -9,11 +9,11 @@ Models and Schemas:
 - TraceRecord
 """
 
-from functools import partial
-from unittest import result
 import marshmallow_dataclass
 
-from typing import Any, List, Optional
+from functools import partial
+from socket import AddressFamily
+from typing import Any, Dict, List, Optional
 from marshmallow import EXCLUDE, ValidationError, fields, validate
 from marshmallow_dataclass import NewType
 from marshmallow_enum import EnumField
@@ -31,6 +31,8 @@ from .constants import (
     RECORD_ID_HEADER,
     PARENT_ID_HEADER
 )
+
+UNAVAILABLE = "unavailable"
 
 """
 Custom Fields and Types
@@ -319,3 +321,101 @@ class TraceRecord(BaseModel):
             return
 
         return self.function_context.handler_execution_time
+
+
+"""
+Memory Measurement
+"""
+
+
+@dataclass
+class MemoryLineUsageItem(BaseModel):
+    line_number: int
+    content: str
+    occurrences: int
+    memory_increment: float
+    memory_total: float
+
+
+@dataclass
+class MemoryLineUsage(BaseModel):
+    line_memories: Dict[int, MemoryLineUsageItem] = field(
+        default_factory=dict)
+
+
+@dataclass
+class MemoryUsage(BaseModel):
+    interval: float
+    measuring_points: List[float] = field(default_factory=list)
+
+
+"""
+CPU Measurement
+"""
+
+
+@dataclass
+class CPUUsage(BaseModel):
+    interval: float
+    measuring_points: List[float] = field(default_factory=list)
+
+
+"""
+Network Measurement
+"""
+
+
+@dataclass
+class NetworkConnectionItem(BaseModel):
+    socket_descriptor: int
+    socket_family: AddressFamily
+    local_address: str
+    remote_address: str
+
+
+@dataclass
+class NetworkConnections(BaseModel):
+    connections: List[NetworkConnectionItem] = field(
+        default_factory=list)
+
+
+@dataclass
+class NetworkIOCounters(BaseModel):
+    bytes_sent: int
+    bytes_received: int
+    packets_sent: int
+    packets_received: int
+    error_in: int
+    error_out: int
+    drop_in: int
+    drop_out: int
+
+
+"""
+Disk Measurement
+"""
+
+"""
+Informations
+"""
+
+
+@dataclass
+class InformationEnvironment(BaseModel):
+    runtime_name: str = UNAVAILABLE
+    runtime_version: str = UNAVAILABLE
+    runtime_implementation: str = UNAVAILABLE
+    runtime_compiler: str = UNAVAILABLE
+    byte_order: str = UNAVAILABLE
+    platform: str = UNAVAILABLE
+    interpreter_path: str = UNAVAILABLE
+    packages: List[str] = field(default_factory=list)
+
+
+@dataclass
+class InformationOperatingSystem(BaseModel):
+    boot_time: datetime
+    system: str = UNAVAILABLE
+    node_name: str = UNAVAILABLE
+    release: str = UNAVAILABLE
+    machine: str = UNAVAILABLE
