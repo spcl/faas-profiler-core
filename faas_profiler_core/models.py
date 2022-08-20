@@ -430,12 +430,12 @@ Captures
 @dataclass
 class S3CaptureItem(BaseModel):
     operation: AWSOperation
-    parameters: dict
-    bucket_name: str
-    object_key: str
-    object_size: float
-    request_method: str
-    request_status: str
-    execution_time: float
-    request_url: str
-    request_uri: str
+    parameters: dict = field(default_factory=dict)
+    bucket_name: str = UNAVAILABLE
+    object_key: str = UNAVAILABLE
+    object_size: float = 0.0
+    request_method: str = UNAVAILABLE
+    request_status: str = UNAVAILABLE
+    execution_time: float = 0.0
+    request_url: str = UNAVAILABLE
+    request_uri: str = UNAVAILABLE
