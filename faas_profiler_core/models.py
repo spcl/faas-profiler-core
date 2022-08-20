@@ -339,8 +339,8 @@ class MemoryLineUsageItem(BaseModel):
 
 @dataclass
 class MemoryLineUsage(BaseModel):
-    line_memories: Dict[int, MemoryLineUsageItem] = field(
-        default_factory=dict)
+    line_memories: List[MemoryLineUsageItem] = field(
+        default_factory=list)
 
 
 @dataclass
