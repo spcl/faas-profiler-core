@@ -22,6 +22,7 @@ from datetime import datetime
 from uuid import UUID
 
 from .constants import (
+    AWSOperation,
     Provider,
     Runtime,
     TriggerSynchronicity,
@@ -419,3 +420,22 @@ class InformationOperatingSystem(BaseModel):
     node_name: str = UNAVAILABLE
     release: str = UNAVAILABLE
     machine: str = UNAVAILABLE
+
+
+"""
+Captures
+"""
+
+
+@dataclass
+class S3CaptureItem(BaseModel):
+    operation: AWSOperation
+    parameters: dict
+    bucket_name: str
+    object_key: str
+    object_size: float
+    request_method: str
+    request_status: str
+    execution_time: float
+    request_url: str
+    request_uri: str
