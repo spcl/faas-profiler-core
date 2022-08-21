@@ -9,9 +9,10 @@ Models and Schemas:
 - TraceRecord
 """
 
+from operator import add
 import marshmallow_dataclass
 
-from functools import partial
+from functools import partial, reduce
 from socket import AddressFamily
 from typing import Any, Dict, List, Optional
 from marshmallow import EXCLUDE, ValidationError, fields, validate
@@ -349,6 +350,13 @@ class MemoryUsage(BaseModel):
     interval: float
     measuring_points: List[float] = field(default_factory=list)
 
+    @property
+    def average(self) -> float:
+        n = len(self.measuring_points)
+        total = reduce(add, self.measuring_points, 0)
+
+        return total / n
+
 
 """
 CPU Measurement
@@ -359,6 +367,13 @@ CPU Measurement
 class CPUUsage(BaseModel):
     interval: float
     measuring_points: List[float] = field(default_factory=list)
+
+    @property
+    def average(self) -> float:
+        n = len(self.measuring_points)
+        total = reduce(add, self.measuring_points, 0)
+
+        return total / n
 
 
 """
