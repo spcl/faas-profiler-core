@@ -121,9 +121,7 @@ class AWSOperation(Operation):
     S3_OBJECT_REMOVED = "ObjectRemoved"  # Combines: permanently and marked deleted
 
     # Dynamo DB
-    DYNAMO_DB_INSERT = "Insert"  # Combines: INSERT, MODIFY, DELETE
-    DYNAMO_DB_MODIFY = "Modify"
-    DYNAMO_DB_DELETE = "Delete"
+    DYNAMO_DB_UPDATE = "Update"  # Combines: INSERT, MODIFY, DELETE
 
     # GATEWAY
     API_GATEWAY_AWS_PROXY = 'GatewayProxy'
