@@ -268,6 +268,17 @@ class OutboundContext(RequestContext):
     has_error: bool = False
     error_message: str = ""
 
+    @property
+    def overhead_time(self) -> float:
+        """
+        Returns the overhead time (ms) for this outbound context.
+        """
+        if self.finished_at is None or self.invoked_at is None:
+            return None
+
+        delta = self.finished_at - self.invoked_at
+        return delta.total_seconds() * 1000
+
 
 """
 Record data
