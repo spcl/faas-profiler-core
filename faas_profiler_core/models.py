@@ -411,6 +411,15 @@ class NetworkIOCounters(BaseModel):
 Disk Measurement
 """
 
+
+@dataclass
+class DiskIOCounters(BaseModel):
+    read_count: int
+    write_count: int
+    read_bytes: int
+    write_bytes: int
+
+
 """
 Informations
 """
