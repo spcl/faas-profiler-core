@@ -229,6 +229,12 @@ class RequestContext(BaseModel):
 
     invoked_at: datetime = None
 
+    def __str__(self) -> str:
+        """
+        Return request context as string
+        """
+        return f"{self.provider.value}::{self.service.value}::{self.operation.value}"
+
     def set_identifiers(self, identifiers: dict) -> None:
         """
         Merges identifier into stored identifier
@@ -256,6 +262,22 @@ class InboundContext(RequestContext):
     Context definition for inbound requests
     """
     trigger_synchronicity: TriggerSynchronicity = TriggerSynchronicity.UNIDENTIFIED
+
+    # After trace processing we eventually know, when the parent finished the trigger
+    # execution.
+    # TODO: Name this better
+    trigger_finished_at: datetime = None
+
+    @property
+    def trigger_overhead_time(self) -> float:
+        """
+        Returns the time between parent finished SDK call and child gets executed
+        """
+        if self.trigger_finished_at is None or self.invoked_at is None:
+            return
+
+        delta = self.invoked_at - self.trigger_finished_at
+        return delta.total_seconds() * 1000
 
 
 @dataclass
