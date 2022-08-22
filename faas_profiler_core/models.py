@@ -227,6 +227,8 @@ class RequestContext(BaseModel):
     identifier: dict = field(default_factory=dict)
     tags: dict = field(default_factory=dict, metadata=dict(load_only=True))
 
+    trigger_synchronicity: TriggerSynchronicity = TriggerSynchronicity.UNIDENTIFIED
+
     invoked_at: datetime = None
 
     def __str__(self) -> str:
@@ -261,8 +263,6 @@ class InboundContext(RequestContext):
     """
     Context definition for inbound requests
     """
-    trigger_synchronicity: TriggerSynchronicity = TriggerSynchronicity.UNIDENTIFIED
-
     # After trace processing we eventually know, when the parent finished the trigger
     # execution.
     # TODO: Name this better
