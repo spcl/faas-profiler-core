@@ -35,8 +35,11 @@ from .constants import (
 )
 
 UNAVAILABLE = "unavailable"
+UNIDENTIFIED = "unidentified"
+
 KEY_VALUE_DELIMITER = "#"
 IDENTIFIER_DELIMITER = 2 * KEY_VALUE_DELIMITER
+FUNCTION_KEY_DELLIMITER = "::"
 
 """
 Custom Fields and Types
@@ -133,11 +136,11 @@ class FunctionContext(BaseModel):
     """
     Context definition for serverless functions.
     """
-    provider: ProviderType
-    runtime: RuntimeType
+    provider: ProviderType = Provider.UNIDENTIFIED
+    runtime: RuntimeType = Runtime.UNIDENTIFIED
 
-    function_name: str = field(metadata=dict(validate=validate.Length(min=1)))
-    handler: str = field(metadata=dict(validate=validate.Length(min=1)))
+    function_name: str = UNIDENTIFIED
+    handler: str = UNIDENTIFIED
 
     invoked_at: datetime = None
     handler_executed_at: datetime = None
@@ -149,7 +152,8 @@ class FunctionContext(BaseModel):
         """
         Returns a unique key for the function.
         """
-        return self.provider.value + "::" + self.function_name
+        return FUNCTION_KEY_DELLIMITER.join(
+            [self.provider.value, self.function_name])
 
     @property
     def handler_execution_time(self):
@@ -347,11 +351,50 @@ Trace Record
 @dataclass
 class TraceRecord(BaseModel):
     function_context: FunctionContext
-    tracing_context: Optional[TracingContext]
+    tracing_context: TracingContext
+
     inbound_context: Optional[InboundContext]
     outbound_contexts: List[OutboundContext] = field(default_factory=list)
 
     data: List[RecordData] = field(default_factory=list)
+
+    """
+    Record shortcut properties
+    """
+
+    @property
+    def function_key(self) -> str:
+        """
+        Returns the function key of the function context.
+        """
+        return self.function_context.function_key
+
+    @property
+    def trace_id(self):
+        """
+        Returns the trace id.
+        """
+        return self.tracing_context.trace_id
+
+    @property
+    def record_id(self):
+        """
+        Returns the record id.
+        """
+        return self.tracing_context.record_id
+
+    @property
+    def record_name(self):
+        """
+        Returns the record name, composed of provider and function name
+        """
+        func_ctx = self.function_context
+        if not func_ctx:
+            return FUNCTION_KEY_DELLIMITER.join([
+                Provider.UNIDENTIFIED.value,
+                UNIDENTIFIED])
+
+        return f"{func_ctx.provider.value}::{func_ctx.function_name}"
 
     @property
     def execution_time(self):
