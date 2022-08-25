@@ -14,7 +14,7 @@ import marshmallow_dataclass
 
 from functools import partial, reduce
 from socket import AddressFamily
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Set
 from marshmallow import EXCLUDE, ValidationError, fields, validate
 from marshmallow_dataclass import NewType
 from marshmallow_enum import EnumField
@@ -382,6 +382,49 @@ class TraceRecord(BaseModel):
             return
 
         return self.function_context.handler_execution_time
+
+
+"""
+Trace
+"""
+
+
+@dataclass
+class Trace(BaseModel):
+    """
+    Represents a single trace for one function.
+    """
+
+    trace_id: UUID
+    records: List[TraceRecord] = field(default_factory=list)
+
+    def __str__(self) -> str:
+        """
+        Returns string representation of the trace.
+        """
+        return f"{self.trace_id} ({len(self.records)} Records)"
+
+
+"""
+Profile
+"""
+
+
+@dataclass
+class Profile(BaseModel):
+    """
+    Represents a single profile run, consisting of mutliple traces
+    """
+    profile_id: UUID
+    function_context: FunctionContext
+    trace_ids: Set[UUID] = field(default_factory=set)
+
+    @property
+    def number_of_traces(self) -> int:
+        """
+        Returns the number of traces.
+        """
+        return len(self.traces)
 
 
 """
