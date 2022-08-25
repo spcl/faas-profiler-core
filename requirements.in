@@ -1,6 +1,9 @@
 # AWS SDK
 boto3
 
+# GCP storage SDK
+google-cloud-storage
+
 # Data management
 marshmallow
 marshmallow_enum
