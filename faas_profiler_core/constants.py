@@ -145,15 +145,48 @@ class AWSRegion(Region):
     EU_CENTRAL = "eu-central-1"
 
 
+"""
+Google Cloud Platform - Services, Operations and Regions
+"""
+
+
+class GCPService(Service):
+    """
+    Enumeration of different GCP Services
+    """
+    # Computing
+    FUNCTIONS = "functions"
+    CLOUD_RUN = "cloud_run"
+    APP_ENGINE = "app_engine"
+
+    # Storage
+    STORAGE = "cloud_storage"
+    FIRESTORE = "fire_store"
+
+    # Messaging
+    PUB_SUB = "pub_sub"
+
+
+class GCPOperation(Operation):
+    """
+    Enumeration of different GCP Operations
+    """
+    FUNCTIONS_INVOKE = "invoke"
+
+
 def service_proxy(provider: Provider) -> Service:
-    if provider == provider.AWS:
+    if provider == Provider.AWS:
         return AWSService
+    elif provider == Provider.GCP:
+        return GCPService
     else:
         return UnidentifiedService
 
 
 def operation_proxy(provider: Provider) -> Operation:
-    if provider == provider.AWS:
+    if provider == Provider.AWS:
         return AWSOperation
+    elif provider == Provider.GCP:
+        return GCPOperation
     else:
         return UnidentifiedOperation
