@@ -14,7 +14,7 @@ import marshmallow_dataclass
 
 from functools import partial, reduce
 from socket import AddressFamily
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 from marshmallow import EXCLUDE, ValidationError, fields, validate
 from marshmallow_dataclass import NewType
 from marshmallow_enum import EnumField
@@ -35,6 +35,8 @@ from .constants import (
 )
 
 UNAVAILABLE = "unavailable"
+KEY_VALUE_DELIMITER = "#"
+IDENTIFIER_DELIMITER = 2 * KEY_VALUE_DELIMITER
 
 """
 Custom Fields and Types
@@ -241,6 +243,14 @@ class RequestContext(BaseModel):
         """
         Merges identifier into stored identifier
         """
+        if any(KEY_VALUE_DELIMITER in k for k in identifiers.keys()):
+            raise ValidationError(
+                f"Keys of identifier dict must not contain any '{KEY_VALUE_DELIMITER}'.")
+
+        if any(KEY_VALUE_DELIMITER in v for v in identifiers.values()):
+            raise ValidationError(
+                f"Values of identifier dict must not contain any '{KEY_VALUE_DELIMITER}'.")
+
         self.identifier.update(identifiers)
 
     def set_tags(self, tags: dict) -> None:
@@ -248,6 +258,22 @@ class RequestContext(BaseModel):
         Merges tags into stored tags
         """
         self.tags.update(tags)
+
+    @property
+    def identifier_string(self) -> str:
+        """
+        Returns the identifiers as string.
+        """
+        _identifier = {str(k): str(v) for k, v in self.identifier.items()}
+        _identifier = sorted(
+            _identifier.items(),
+            key=lambda x: x[0],
+            reverse=False)
+        _identifier = map(
+            lambda id: KEY_VALUE_DELIMITER.join(id),
+            _identifier)
+
+        return IDENTIFIER_DELIMITER.join(_identifier)
 
     @property
     def resolvable(self) -> bool:
