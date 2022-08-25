@@ -150,11 +150,12 @@ class S3RecordStorage(RecordStorage):
     Storage implementation for AWS S3.
     """
 
-    def __init__(self, bucket_name: str) -> None:
+    def __init__(self, bucket_name: str, region_name: str) -> None:
         super().__init__()
 
         self.bucket_name = bucket_name
-        self.client = boto3.client('s3')
+        self.region_name = region_name
+        self.client = boto3.client('s3', region_name=self.region_name)
 
     @cached_property
     def profile_ids(self) -> list[UUID]:
