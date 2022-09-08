@@ -153,6 +153,7 @@ class FunctionContext(BaseModel):
 
     has_error: bool = False
     error_type: Exception = None
+    error_message: str = None
     traceback: List[str] = field(default_factory=list)
     response: Any = None
     arguments: dict = field(default_factory=dict)
