@@ -138,6 +138,7 @@ class FunctionContext(BaseModel):
     """
     provider: ProviderType = Provider.UNIDENTIFIED
     runtime: RuntimeType = Runtime.UNIDENTIFIED
+    region: str = UNIDENTIFIED
 
     function_name: str = UNIDENTIFIED
     handler: str = UNIDENTIFIED
@@ -146,6 +147,16 @@ class FunctionContext(BaseModel):
     handler_executed_at: datetime = None
     handler_finished_at: datetime = None
     finished_at: datetime = None
+
+    max_memory: float = None
+    max_execution_time: float = None
+
+    has_error: bool = False
+    error_type: Exception = None
+    traceback: List[str] = field(default_factory=list)
+    response: Any = None
+    arguments: dict = field(default_factory=dict)
+    environment_variables: dict = field(default_factory=dict)
 
     @property
     def function_key(self):
