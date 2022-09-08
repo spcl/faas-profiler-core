@@ -606,6 +606,12 @@ class InformationIsWarm(BaseModel):
     warm_for: int = 0
 
 
+@dataclass
+class InformationTimeShift(BaseModel):
+    server: str = UNAVAILABLE
+    offset: float = 0.0
+
+
 """
 Captures
 """
