@@ -148,8 +148,8 @@ class FunctionContext(BaseModel):
     handler_finished_at: datetime = None
     finished_at: datetime = None
 
-    max_memory: float = None
-    max_execution_time: float = None
+    max_memory: int = None
+    max_execution_time: int = None
 
     has_error: bool = False
     error_type: Exception = None
