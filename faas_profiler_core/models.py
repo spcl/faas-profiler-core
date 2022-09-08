@@ -14,7 +14,7 @@ import marshmallow_dataclass
 
 from functools import partial, reduce
 from socket import AddressFamily
-from typing import Any, List, Optional, Set
+from typing import Any, List, Optional, Set, Union
 from marshmallow import EXCLUDE, ValidationError, fields, validate
 from marshmallow_dataclass import NewType
 from marshmallow_enum import EnumField
@@ -220,6 +220,14 @@ class TracingContext(BaseModel):
 """
 Inbound and Outbound Context
 """
+
+STRONG = "strong"
+WEAK = "weak"
+
+
+@dataclass
+class Identifier:
+    type: Union[STRONG, WEAK]
 
 
 @dataclass
@@ -591,6 +599,13 @@ class InformationOperatingSystem(BaseModel):
     machine: str = UNAVAILABLE
 
 
+@dataclass
+class InformationIsWarm(BaseModel):
+    is_warm: bool = False
+    warm_since: datetime = UNAVAILABLE
+    warm_for: int = 0
+
+
 """
 Captures
 """
@@ -608,3 +623,13 @@ class S3CaptureItem(BaseModel):
     execution_time: float = 0.0
     request_url: str = UNAVAILABLE
     request_uri: str = UNAVAILABLE
+
+
+@dataclass
+class EFSCaptureItem(BaseModel):
+    efs_mount_point: str
+    file_name: str
+    io_type: str
+    encoding: str
+    mode: str
+    execution_time: float
