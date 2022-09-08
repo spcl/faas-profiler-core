@@ -152,7 +152,7 @@ class FunctionContext(BaseModel):
     max_execution_time: int = None
 
     has_error: bool = False
-    error_type: Exception = None
+    error_type: str = None
     error_message: str = None
     traceback: List[str] = field(default_factory=list)
     response: Any = None
