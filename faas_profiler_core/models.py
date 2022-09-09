@@ -15,7 +15,7 @@ import marshmallow_dataclass
 
 from functools import partial, reduce
 from socket import AddressFamily
-from typing import Any, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set, Union
 from marshmallow import EXCLUDE, ValidationError, fields, validate
 from marshmallow_dataclass import NewType
 from marshmallow_enum import EnumField
@@ -24,7 +24,7 @@ from datetime import datetime
 from uuid import UUID
 
 from .constants import (
-    AWSOperation,
+    RecordDataType,
     InternalOperation,
     Provider,
     Runtime,
@@ -362,6 +362,7 @@ Record data
 @dataclass
 class RecordData(BaseModel):
     name: str
+    type: RecordDataType
     results: Any
 
 
@@ -378,7 +379,7 @@ class TraceRecord(BaseModel):
     inbound_context: Optional[InboundContext]
     outbound_contexts: List[OutboundContext] = field(default_factory=list)
 
-    data: List[RecordData] = field(default_factory=list)
+    data: Dict[str, RecordData] = field(default_factory=dict)
 
     """
     Record shortcut properties
@@ -650,7 +651,6 @@ class S3Capture(BaseModel):
         default_factory=list)
     head_objects: List[S3AccessItem] = field(
         default_factory=list)
-    
 
 
 @dataclass

@@ -19,6 +19,16 @@ Enums
 """
 
 
+class RecordDataType(Enum):
+    """
+    Enumeration of different record data types
+    """
+    UNCATEGORIZED = "uncategorized"
+    SIMPLE_MEASUREMENT = "simple_measurement"
+    PERIODIC_MEASUREMENT = "periodic_measurement"
+    CAPTURE = "capture"
+
+
 class Runtime(Enum):
     """
     Enumeration of different runtimes.
