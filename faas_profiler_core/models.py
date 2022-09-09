@@ -10,6 +10,7 @@ Models and Schemas:
 """
 
 from operator import add
+from turtle import st
 import marshmallow_dataclass
 
 from functools import partial, reduce
@@ -631,17 +632,20 @@ Captures
 
 
 @dataclass
-class S3CaptureItem(BaseModel):
-    operation: AWSOperation
-    parameters: dict = field(default_factory=dict)
-    bucket_name: str = UNAVAILABLE
-    object_key: str = UNAVAILABLE
-    object_size: float = 0.0
-    request_method: str = UNAVAILABLE
-    request_status: str = UNAVAILABLE
-    execution_time: float = 0.0
-    request_url: str = UNAVAILABLE
-    request_uri: str = UNAVAILABLE
+class S3AccessItem(BaseModel):
+    mode: str
+    object_key: str
+    object_sizes: List[int] = field(default_factory=dict)
+    execution_times: List[float] = field(default_factory=list)
+
+
+@dataclass
+class S3Capture(BaseModel):
+    bucket_name: str
+    written_objects: List[S3AccessItem] = field(
+        default_factory=list)
+    read_objects: List[S3AccessItem] = field(
+        default_factory=list)
 
 
 @dataclass
