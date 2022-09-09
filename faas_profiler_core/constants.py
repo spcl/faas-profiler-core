@@ -168,6 +168,9 @@ class AWSOperation(Operation):
 
     # SQS
     SQS_RECEIVE = "ReceiveMessage"
+    SQS_SEND = "SendMessage"
+    SQS_SEND_BATCH = "SendMessageBatch"
+    SQS_DELETE = "DeleteMessage"
 
     # SNS
     SNS_TOPIC_NOTIFICATION = "TopicNotification"
