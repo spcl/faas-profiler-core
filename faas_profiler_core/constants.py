@@ -36,6 +36,7 @@ class Provider(Enum):
     AWS = "aws"
     GCP = "gcp"
     AZURE = "azure"
+    INTERNAL = "internal"
 
 
 class Region(Enum):
@@ -82,6 +83,30 @@ class UnidentifiedOperation(Operation):
     Default service for unidentified services.
     """
     UNIDENTIFIED = 'unidentified'
+
+
+"""
+Internal
+"""
+
+
+class InternalService(Service):
+    """
+    Enumeration of different internal services
+    """
+    UNIDENTIFIED = 'unidentified'
+    IO = "IO"
+
+
+class InternalOperation(Operation):
+    """
+    Enumeration of different internal operations
+    """
+    UNIDENTIFIED = 'unidentified'
+
+    IO_READ = "io_read"
+    IO_WRITE = "io_write"
+    IO_READ_WRITE = "io_read_write"
 
 
 """
@@ -179,6 +204,8 @@ def service_proxy(provider: Provider) -> Service:
         return AWSService
     elif provider == Provider.GCP:
         return GCPService
+    elif provider == Provider.INTERNAL:
+        return InternalService
     else:
         return UnidentifiedService
 
@@ -188,5 +215,7 @@ def operation_proxy(provider: Provider) -> Operation:
         return AWSOperation
     elif provider == Provider.GCP:
         return GCPOperation
+    elif provider == Provider.INTERNAL:
+        return InternalOperation
     else:
         return UnidentifiedOperation
