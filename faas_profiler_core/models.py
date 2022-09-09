@@ -642,10 +642,15 @@ class S3AccessItem(BaseModel):
 @dataclass
 class S3Capture(BaseModel):
     bucket_name: str
-    written_objects: List[S3AccessItem] = field(
+    get_objects: List[S3AccessItem] = field(
         default_factory=list)
-    read_objects: List[S3AccessItem] = field(
+    create_objects: List[S3AccessItem] = field(
         default_factory=list)
+    deleted_objects: List[S3AccessItem] = field(
+        default_factory=list)
+    head_objects: List[S3AccessItem] = field(
+        default_factory=list)
+    
 
 
 @dataclass
