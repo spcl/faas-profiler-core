@@ -145,6 +145,8 @@ class AWSOperation(Operation):
     S3_OBJECT_CREATE = "ObjectCreated"  # Combines: PUT, POST, COPY
     S3_OBJECT_REMOVED = "ObjectRemoved"  # Combines: permanently and marked deleted
     S3_OBJECT_GET = "ObjectGet"
+    S3_OBJECT_HEAD = "ObjectHead"
+    S3_BUCKET_HEAD = "BucketHead"
 
     # Dynamo DB
     DYNAMO_DB_UPDATE = "Update"  # Combines: INSERT, MODIFY, DELETE
