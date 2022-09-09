@@ -24,6 +24,7 @@ from uuid import UUID
 
 from .constants import (
     AWSOperation,
+    InternalOperation,
     Provider,
     Runtime,
     TriggerSynchronicity,
@@ -644,10 +645,17 @@ class S3CaptureItem(BaseModel):
 
 
 @dataclass
-class EFSCaptureItem(BaseModel):
-    efs_mount_point: str
-    file_name: str
-    io_type: str
-    encoding: str
-    mode: str
-    execution_time: float
+class EFSAccessItem(BaseModel):
+    mode: InternalOperation
+    file: str
+    file_sizes: List[int] = field(default_factory=list)
+    execution_times: List[float] = field(default_factory=list)
+
+
+@dataclass
+class EFSCapture(BaseModel):
+    mount_point: str
+    written_files: List[EFSAccessItem] = field(
+        default_factory=list)
+    read_files: List[EFSAccessItem] = field(
+        default_factory=list)
