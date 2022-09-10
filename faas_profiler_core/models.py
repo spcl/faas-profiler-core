@@ -551,10 +551,9 @@ Network Measurement
 
 @dataclass
 class NetworkConnectionItem(BaseModel):
-    socket_descriptor: int
     socket_family: AddressFamily
-    local_address: str
     remote_address: str
+    number_of_connections: int
 
 
 @dataclass
