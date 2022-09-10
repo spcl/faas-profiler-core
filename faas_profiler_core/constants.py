@@ -221,7 +221,12 @@ class GCPOperation(Operation):
     """
     Enumeration of different GCP Operations
     """
+    # Computing
     FUNCTIONS_INVOKE = "invoke"
+
+    # Storage
+    STORAGE_UPLOAD = "CreateObject"
+    STORAGE_DELETE = "DeleteObject"
 
 
 def service_proxy(provider: Provider) -> Service:
