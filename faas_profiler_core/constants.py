@@ -152,6 +152,7 @@ class AWSOperation(Operation):
     UNIDENTIFIED = 'unidentified'
     # Lambda
     LAMBDA_INVOKE = "invoke"
+    LAMBDA_FUNCTION_URL = "FunctionUrl"
 
     # S3
     S3_OBJECT_CREATE = "ObjectCreated"  # Combines: PUT, POST, COPY
