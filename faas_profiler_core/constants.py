@@ -177,12 +177,15 @@ class AWSOperation(Operation):
 
     # SNS
     SNS_TOPIC_NOTIFICATION = "TopicNotification"
+    SNS_PUBLISH = "Publish"
+    SNS_PUBLISH_BATCH = "PublishBatch"
 
     # SES
     SES_EMAIL_RECEIVE = "ReceiveEmail"
 
     # Eventbridge
     EVENTBRIDGE_SCHEDULED_EVENT = "ScheduledEvent"
+    EVENTBRIDGE_PUT_EVENTS = "PutEvents"
 
     # CloudWatch
     CLOUDWATCH_LOGS = "Logs"
