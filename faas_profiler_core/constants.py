@@ -141,6 +141,8 @@ class AWSService(Service):
     AWS_CONFIG = 'aws_config'
     KINESIS = 'kinesis'
     API_GATEWAY = 'api_gateway'
+    EVENTBRIDGE = "eventbridge"
+    CLOUDWATCH = "cloudwatch"
 
 
 class AWSOperation(Operation):
@@ -177,6 +179,12 @@ class AWSOperation(Operation):
 
     # SES
     SES_EMAIL_RECEIVE = "ReceiveEmail"
+
+    # Eventbridge
+    EVENTBRIDGE_SCHEDULED_EVENT = "ScheduledEvent"
+
+    # CloudWatch
+    CLOUDWATCH_LOGS = "Logs"
 
 
 class AWSRegion(Region):
