@@ -26,6 +26,18 @@ class RecordStorageError(RuntimeError):
     pass
 
 
+def safe_json_serialize(obj: dict) -> str:
+    """
+    Safe serialize JSON
+    """
+    default = lambda o: f"<<non-serializable: {type(o).__qualname__}>>"
+    return json.dumps(
+        obj,
+        ensure_ascii=False,
+        indent=None,
+        default=default
+    ).encode('utf-8')
+
 class RecordStorage(ABC, Loggable):
     """
     Base class for all storage abstraction.
@@ -257,11 +269,7 @@ class S3RecordStorage(RecordStorage):
         """
         _record_key = self.UNPROCESSED_RECORDS_FORMAT.format(
             record_id=record.record_id)
-        record_json = json.dumps(
-            record.dump(),
-            ensure_ascii=False,
-            indent=None
-        ).encode('utf-8')
+        record_json = safe_json_serialize(record.dump())
 
         self.client.put_object(
             Bucket=self.bucket_name,
@@ -291,11 +299,7 @@ class S3RecordStorage(RecordStorage):
         Stores a new profile.
         """
         profile_data = profile.dump()
-        profile_json = json.dumps(
-            profile_data,
-            ensure_ascii=False,
-            indent=None
-        ).encode('utf-8')
+        profile_json = safe_json_serialize(profile_data)
 
         _key_name = f"{self.PROFILES_PREFIX}{profile.profile_id}.json"
         self.client.put_object(
@@ -308,11 +312,7 @@ class S3RecordStorage(RecordStorage):
         Stores a new trace.
         """
         trace_data = trace.dump()
-        trace_json = json.dumps(
-            trace_data,
-            ensure_ascii=False,
-            indent=None
-        ).encode('utf-8')
+        trace_json = safe_json_serialize(trace_data)
 
         _key_name = f"{self.PROCESSED_TRACES_PREFIX}{trace.trace_id}.json"
         self.client.put_object(
@@ -430,11 +430,7 @@ class GCPRecordStorage(RecordStorage):
         """
         _profile_key = self.PROFILES_FORMAT.format(
             profile_id=str(profile.profile_id))
-        profile_json = json.dumps(
-            profile.dump(),
-            ensure_ascii=False,
-            indent=None
-        ).encode('utf-8')
+        profile_json = safe_json_serialize(profile.dump())
 
         profile_blob = self.bucket.blob(_profile_key)
         profile_blob.upload_from_string(profile_json)
@@ -463,11 +459,7 @@ class GCPRecordStorage(RecordStorage):
         """
         _trace_key = self.TRACE_FORMAT.format(
             trace_id=str(trace.trace_id))
-        trace_json = json.dumps(
-            trace.dump(),
-            ensure_ascii=False,
-            indent=None
-        ).encode('utf-8')
+        trace_json = safe_json_serialize(trace.dump())
 
         trace_blob = self.bucket.blob(_trace_key)
         trace_blob.upload_from_string(trace_json)
@@ -501,11 +493,7 @@ class GCPRecordStorage(RecordStorage):
         """
         _record_key = self.UNPROCESSED_RECORDS_FORMAT.format(
             record_id=str(record.record_id))
-        record_json = json.dumps(
-            record.dump(),
-            ensure_ascii=False,
-            indent=None
-        ).encode('utf-8')
+        record_json = safe_json_serialize(record.dump())
 
         record_blob = self.bucket.blob(_record_key)
         record_blob.upload_from_string(record_json)
