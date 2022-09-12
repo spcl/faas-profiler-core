@@ -30,13 +30,15 @@ def safe_json_serialize(obj: dict) -> str:
     """
     Safe serialize JSON
     """
-    default = lambda o: f"<<non-serializable: {type(o).__qualname__}>>"
+    def default(o): return f"<<non-serializable: {type(o).__qualname__}>>"
+
     return json.dumps(
         obj,
         ensure_ascii=False,
         indent=None,
         default=default
     ).encode('utf-8')
+
 
 class RecordStorage(ABC, Loggable):
     """
@@ -68,6 +70,12 @@ class RecordStorage(ABC, Loggable):
     def profile_ids(self) -> list[UUID]:
         """
         Returns a list of all profile IDs
+        """
+        pass
+
+    def profiles(self) -> list[Profile]:
+        """
+        Returns all profiles
         """
         pass
 
@@ -194,6 +202,37 @@ class S3RecordStorage(RecordStorage):
                     f"Failed to load profile ID: {err}")
 
         return profile_ids
+
+    def profiles(self) -> list[Profile]:
+        """
+        Returns all profiles
+        """
+        all_profile_keys = self._list_objects_with_paginator(
+            prefix=self.PROFILES_PREFIX)
+
+        if all_profile_keys is None or len(all_profile_keys) == 0:
+            return []
+
+        for profile_meta in all_profile_keys:
+            _key = profile_meta.get("Key")
+            if not _key:
+                continue
+
+            try:
+                obj = self.client.get_object(Bucket=self.bucket_name, Key=_key)
+            except ClientError as err:
+                self.logger.error(
+                    f"Failed to get object {_key}: {err}")
+                continue
+
+            if "Body" in obj:
+                body = json.loads(obj["Body"].read().decode('utf-8'))
+                try:
+                    yield Profile.load(body)
+                except ValidationError as err:
+                    self.logger.error(
+                        f"Failed to deserialize {body}: {err}")
+                    continue
 
     @property
     def number_of_profiles(self) -> int:
