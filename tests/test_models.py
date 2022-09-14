@@ -21,8 +21,6 @@ Testing Function Context
 @pytest.mark.parametrize("data", [
     {"provider": "", "runtime": "python", "function_name": "foo-bar", "handler": "foo.bar"},
     {"provider": "aws", "runtime": "", "function_name": "foo-bar", "handler": "foo.bar"},
-    {"provider": "aws", "runtime": "python", "function_name": "", "handler": "foo.bar"},
-    {"provider": "aws", "runtime": "python", "function_name": "foo-bar", "handler": ""}
 ])
 def test_load_with_missing_data(data):
     with pytest.raises(marshmallow.ValidationError):
