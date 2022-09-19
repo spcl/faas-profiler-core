@@ -231,6 +231,9 @@ class GCPOperation(Operation):
     STORAGE_UPLOAD = "CreateObject"
     STORAGE_DELETE = "DeleteObject"
 
+    # PUB/SUB
+    PUB_SUB_PUBLISH = "Publish"
+
 
 def service_proxy(provider: Provider) -> Service:
     if provider == Provider.AWS:
