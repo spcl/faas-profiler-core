@@ -268,7 +268,7 @@ class RequestContext(BaseModel):
         """
         Merges identifier into stored identifier
         """
-        _identifiers = {str(k): str(v) for k,v in self.identifier.items()}
+        _identifiers = {str(k): str(v) for k,v in identifiers.items()}
 
         if any(KEY_VALUE_DELIMITER in k for k in _identifiers.keys()):
             raise ValidationError(
