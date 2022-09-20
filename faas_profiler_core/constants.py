@@ -218,6 +218,7 @@ class GCPService(Service):
 
     # Messaging
     PUB_SUB = "pub_sub"
+    CLOUD_TASKS = "cloud_tasks"
 
 
 class GCPOperation(Operation):
@@ -233,6 +234,9 @@ class GCPOperation(Operation):
 
     # PUB/SUB
     PUB_SUB_PUBLISH = "Publish"
+
+    # CLOUD TASKS
+    CLOUD_TASKS_CREATE = "CreateTask"
 
 
 def service_proxy(provider: Provider) -> Service:
