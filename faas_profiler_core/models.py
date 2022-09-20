@@ -268,15 +268,17 @@ class RequestContext(BaseModel):
         """
         Merges identifier into stored identifier
         """
-        if any(KEY_VALUE_DELIMITER in k for k in identifiers.keys()):
+        _identifiers = {str(k): str(v) for k,v in self.identifier.items()}
+
+        if any(KEY_VALUE_DELIMITER in k for k in _identifiers.keys()):
             raise ValidationError(
                 f"Keys of identifier dict must not contain any '{KEY_VALUE_DELIMITER}'.")
 
-        if any(KEY_VALUE_DELIMITER in v for v in identifiers.values()):
+        if any(KEY_VALUE_DELIMITER in v for v in _identifiers.values()):
             raise ValidationError(
                 f"Values of identifier dict must not contain any '{KEY_VALUE_DELIMITER}'.")
 
-        self.identifier.update(identifiers)
+        self.identifier.update(_identifiers)
 
     def set_tags(self, tags: dict) -> None:
         """
