@@ -207,6 +207,8 @@ class GCPService(Service):
     """
     Enumeration of different GCP Services
     """
+    UNIDENTIFIED = 'unidentified'
+
     # Computing
     FUNCTIONS = "functions"
     CLOUD_RUN = "cloud_run"
@@ -225,6 +227,8 @@ class GCPOperation(Operation):
     """
     Enumeration of different GCP Operations
     """
+    UNIDENTIFIED = 'unidentified'
+
     # Computing
     FUNCTIONS_INVOKE = "invoke"
 
