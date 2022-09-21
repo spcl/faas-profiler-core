@@ -273,7 +273,7 @@ class RequestContext(BaseModel):
         """
         return "RequestContext: Provider={provider}, Service={service}, Operation={operation}, identifier={identifier}".format(
             provider=self.provider,
-            serivce=self.service,
+            service=self.service,
             operation=self.operation,
             identifier=self.identifier_string)
 
