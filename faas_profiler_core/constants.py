@@ -241,6 +241,7 @@ class GCPOperation(Operation):
 
     # CLOUD TASKS
     CLOUD_TASKS_CREATE = "CreateTask"
+    CLOUD_TASK_RECEIVCE = "ReceiveTask"
 
 
 def service_proxy(provider: Provider) -> Service:
