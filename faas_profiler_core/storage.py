@@ -14,7 +14,6 @@ from abc import ABC, abstractproperty, abstractmethod
 from typing import Type
 from botocore.exceptions import ClientError
 from marshmallow import ValidationError
-from functools import cached_property
 from uuid import UUID
 from os.path import basename, splitext
 
@@ -177,31 +176,37 @@ class S3RecordStorage(RecordStorage):
         self.region_name = region_name
         self.client = boto3.client('s3', region_name=self.region_name)
 
-    @cached_property
+        self._profile_ids = None
+        self._unprocessed_record_keys = None
+
+    @property
     def profile_ids(self) -> list[UUID]:
         """
         Returns a list of all profile IDs
         """
+        if self._profile_ids is not None:
+            return self._profile_ids
+
         all_profile_keys = self._list_objects_with_paginator(
             prefix=self.PROFILES_PREFIX)
 
         if all_profile_keys is None or len(all_profile_keys) == 0:
             return []
 
-        profile_ids = []
+        self._profile_ids = []
         all_profile_keys = sorted(
             all_profile_keys, key=lambda x: x["LastModified"], reverse=False)
 
         for profile_key in all_profile_keys:
             try:
                 base = basename(profile_key.get("Key", ""))
-                profile_ids.append(
+                self._profile_ids.append(
                     UUID(splitext(base)[0]))
             except Exception as err:
                 self.logger.error(
                     f"Failed to load profile ID: {err}")
 
-        return profile_ids
+        return self._profile_ids
 
     def profiles(self) -> list[Profile]:
         """
@@ -260,19 +265,24 @@ class S3RecordStorage(RecordStorage):
                 raise RecordStorageError(
                     f"Failed to deserialize {body}: {err}")
 
-    @cached_property
+    @property
     def unprocessed_record_keys(self) -> list[str]:
         """
         Returns a list of unprocessed records sorted by last modified
         """
+        if self._unprocessed_record_keys is not None:
+            self._unprocessed_record_keys
+
         record_keys = self._list_objects_with_paginator(
             prefix=self.UNPROCESSED_RECORDS_PREFIX)
 
-        return [
+        self._unprocessed_record_keys = [
             obj["Key"] for obj in sorted(
                 record_keys,
                 key=lambda x: x["LastModified"],
                 reverse=False)]
+
+        return self._unprocessed_record_keys
 
     @property
     def number_of_unprocessed_records(self) -> int:
@@ -419,6 +429,8 @@ class GCPRecordStorage(RecordStorage):
         self.client = storage.Client(self.project)
         self.bucket = self.client.bucket(self.bucket_name)
 
+        self._unprocessed_record_keys = None
+
     @property
     def profile_ids(self) -> list[UUID]:
         """
@@ -507,17 +519,22 @@ class GCPRecordStorage(RecordStorage):
     Record methods
     """
 
-    @cached_property
+    @property
     def unprocessed_record_keys(self) -> list[str]:
         """
         Returns a list of unprocessed records.
         """
+        if self._unprocessed_record_keys is not None:
+            return self._unprocessed_record_keys
+
         record_blobs = self.client.list_blobs(
             self.bucket_name,
             prefix=self.UNPROCESSED_RECORDS_PREFIX,
             delimiter="/")
 
-        return [b.name for b in record_blobs]
+        self._unprocessed_record_keys = [b.name for b in record_blobs]
+
+        return self._unprocessed_record_keys
 
     @property
     def number_of_unprocessed_records(self) -> int:

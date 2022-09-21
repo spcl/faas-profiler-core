@@ -220,9 +220,7 @@ class TracingContext(BaseModel):
         Return tracing as string
         """
         return "TracingContext: TraceID={trace_id}, RecordID={record_id}, ParentID={parent_id}".format(
-            trace_id=self.trace_id,
-            record_id=self.record_id,
-            parent_id=self.parent_id)
+            trace_id=self.trace_id, record_id=self.record_id, parent_id=self.parent_id)
 
     def to_injectable(self) -> dict:
         """
@@ -272,16 +270,13 @@ class RequestContext(BaseModel):
         Return request context as string
         """
         return "RequestContext: Provider={provider}, Service={service}, Operation={operation}, identifier={identifier}".format(
-            provider=self.provider,
-            service=self.service,
-            operation=self.operation,
-            identifier=self.identifier_string)
+            provider=self.provider, service=self.service, operation=self.operation, identifier=self.identifier_string)
 
     def set_identifiers(self, identifiers: dict) -> None:
         """
         Merges identifier into stored identifier
         """
-        _identifiers = {str(k): str(v) for k,v in identifiers.items()}
+        _identifiers = {str(k): str(v) for k, v in identifiers.items()}
 
         if any(KEY_VALUE_DELIMITER in k for k in _identifiers.keys()):
             raise ValidationError(
