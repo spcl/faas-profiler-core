@@ -353,7 +353,7 @@ class S3RecordStorage(RecordStorage):
         trace_data = trace.dump()
         trace_json = safe_json_serialize(trace_data)
 
-        _key_name = f"{self.PROCESSED_TRACES_PREFIX}{trace.trace_id}.json"
+        _key_name = self.TRACE_FORMAT.format(trace_id=str(trace.trace_id))
         self.client.put_object(
             Bucket=self.bucket_name,
             Key=_key_name,
