@@ -215,6 +215,15 @@ class TracingContext(BaseModel):
     record_id: UUID
     parent_id: UUID = None
 
+    def __str__(self) -> str:
+        """
+        Return tracing as string
+        """
+        return "TracingContext: TraceID={trace_id}, RecordID={record_id}, ParentID={parent_id}".format(
+            trace_id=self.trace_id,
+            record_id=self.record_id,
+            parent_id=self.parent_id)
+
     def to_injectable(self) -> dict:
         """
         Returns the context as injectable context.
@@ -262,7 +271,11 @@ class RequestContext(BaseModel):
         """
         Return request context as string
         """
-        return f"{self.provider.value}::{self.service.value}::{self.operation.value}"
+        return "RequestContext: Provider={provider}, Service={service}, Operation={operation}, identifier={identifier}".format(
+            provider=self.provider,
+            serivce=self.service,
+            operation=self.operation,
+            identifier=self.identifier_string)
 
     def set_identifiers(self, identifiers: dict) -> None:
         """
