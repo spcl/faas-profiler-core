@@ -471,7 +471,7 @@ class Trace(BaseModel):
     """
 
     trace_id: UUID
-    records: List[TraceRecord] = field(default_factory=list)
+    records: Dict[UUID, TraceRecord] = field(default_factory=dict)
 
     def __str__(self) -> str:
         """
