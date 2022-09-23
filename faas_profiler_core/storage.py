@@ -386,7 +386,6 @@ class S3RecordStorage(RecordStorage):
             Key=graph_key,
             Body=safe_json_serialize(graph_data))
 
-
     def get_trace(self, trace_id: UUID) -> Type[Trace]:
         """
         Gets a single trace.
@@ -417,7 +416,6 @@ class S3RecordStorage(RecordStorage):
         obj = self.client.get_object(Bucket=self.bucket_name, Key=graph_key)
 
         return json.loads(obj["Body"].read().decode('utf-8'))
-
 
     """
     Private methods

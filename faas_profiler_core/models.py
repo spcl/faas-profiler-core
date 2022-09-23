@@ -9,10 +9,9 @@ Models and Schemas:
 - TraceRecord
 """
 
-from operator import add
 import marshmallow_dataclass
 
-from functools import partial, reduce
+from functools import partial
 from socket import AddressFamily
 from typing import Any, Dict, List, Optional, Set, Tuple, Type, Union
 from marshmallow import EXCLUDE, ValidationError, fields
@@ -549,7 +548,6 @@ class Profile(BaseModel):
         """
         return len(self.traces)
 
-
     @property
     def title(self) -> str:
         """
@@ -557,8 +555,9 @@ class Profile(BaseModel):
         """
         if not self.function_context:
             return str(self.profile_id)
-        
+
         return f"{self.function_context.function_key} ({str(self.profile_id)[:8]})"
+
 
 """
 Memory Measurement
@@ -583,15 +582,7 @@ class MemoryLineUsage(BaseModel):
 @dataclass
 class MemoryUsage(BaseModel):
     interval: float
-    # measuring_points: List[float] = field(default_factory=list)
     measuring_points: List[Tuple[float, float]] = field(default_factory=list)
-
-    @property
-    def average(self) -> float:
-        n = len(self.measuring_points)
-        total = reduce(add, self.measuring_points, 0)
-
-        return total / n
 
 
 """
@@ -602,14 +593,7 @@ CPU Measurement
 @dataclass
 class CPUUsage(BaseModel):
     interval: float
-    measuring_points: List[float] = field(default_factory=list)
-
-    @property
-    def average(self) -> float:
-        n = len(self.measuring_points)
-        total = reduce(add, self.measuring_points, 0)
-
-        return total / n
+    measuring_points: List[Tuple[float, float]] = field(default_factory=list)
 
 
 """
