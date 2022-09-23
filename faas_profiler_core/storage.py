@@ -51,6 +51,9 @@ class RecordStorage(ABC, Loggable):
     TRACES_PREFIX = "traces/"
     TRACE_FORMAT = TRACES_PREFIX + "{trace_id}.json"
 
+    GRAPHS_PREFIX = "graphs/"
+    GRAPH_FORMAT = GRAPHS_PREFIX + "{trace_id}.json"
+
     UNPROCESSED_RECORDS_PREFIX = "unprocessed_records/"
     UNPROCESSED_RECORDS_FORMAT = UNPROCESSED_RECORDS_PREFIX + \
         "{record_id}.json"
@@ -369,6 +372,21 @@ class S3RecordStorage(RecordStorage):
             Key=_key_name,
             Body=trace_json)
 
+    def store_graph_data(
+        self,
+        trace_id: UUID,
+        graph_data: dict
+    ) -> None:
+        """
+        Stores a graph pickle file.
+        """
+        graph_key = self.GRAPH_FORMAT.format(trace_id=str(trace_id))
+        self.client.put_object(
+            Bucket=self.bucket_name,
+            Key=graph_key,
+            Body=safe_json_serialize(graph_data))
+
+
     def get_trace(self, trace_id: UUID) -> Type[Trace]:
         """
         Gets a single trace.
@@ -387,6 +405,19 @@ class S3RecordStorage(RecordStorage):
             except ValidationError as err:
                 raise RecordStorageError(
                     f"Failed to deserialize {body}: {err}")
+
+    def get_graph_data(
+        self,
+        trace_id: UUID,
+    ) -> str:
+        """
+        Gets graph pickle
+        """
+        graph_key = self.GRAPH_FORMAT.format(trace_id=str(trace_id))
+        obj = self.client.get_object(Bucket=self.bucket_name, Key=graph_key)
+
+        return json.loads(obj["Body"].read().decode('utf-8'))
+
 
     """
     Private methods
@@ -453,6 +484,25 @@ class GCPRecordStorage(RecordStorage):
                     f"Failed to load profile ID: {err}")
 
         return profile_ids
+
+    def profiles(self) -> list[Profile]:
+        """
+        Returns all profiles
+        """
+        profile_blobs = self.client.list_blobs(
+            self.bucket_name,
+            prefix=self.PROFILES_PREFIX,
+            delimiter="/")
+
+        for profile_blob in profile_blobs:
+            profile_json = profile_blob.download_as_bytes()
+            profile_data = json.loads(profile_json.decode('utf-8'))
+            try:
+                yield Profile.load(profile_data)
+            except ValidationError as err:
+                self.logger.error(
+                    f"Failed to deserialize {profile_data}: {err}")
+                continue
 
     @property
     def number_of_profiles(self) -> int:

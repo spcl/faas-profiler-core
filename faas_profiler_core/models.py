@@ -14,13 +14,13 @@ import marshmallow_dataclass
 
 from functools import partial, reduce
 from socket import AddressFamily
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Type, Union
 from marshmallow import EXCLUDE, ValidationError, fields
 from marshmallow_dataclass import NewType
 from marshmallow_enum import EnumField
 from dataclasses import dataclass, field
 from datetime import datetime
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from .constants import (
     RecordDataType,
@@ -394,6 +394,17 @@ class TraceRecord(BaseModel):
     Record shortcut properties
     """
 
+    def __str__(self) -> str:
+        record_str = self.record_name
+
+        if self.record_id:
+            record_str += f" - {str(self.record_id)[:8]}"
+
+        if self.total_execution_time:
+            record_str += " - ({:.2f} ms)".format(self.total_execution_time)
+
+        return record_str
+
     @property
     def function_key(self) -> str:
         """
@@ -429,7 +440,7 @@ class TraceRecord(BaseModel):
         return f"{func_ctx.provider.value}::{func_ctx.function_name}"
 
     @property
-    def execution_time(self):
+    def total_execution_time(self):
         """
         Returns the execution time of the trace in ms.
         """
@@ -449,7 +460,7 @@ class TraceRecord(BaseModel):
         return self.function_context.profiler_time
 
     @property
-    def handler_time(self):
+    def handler_execution_time(self):
         """
         Returns the execution time of the handler in ms.
         """
@@ -473,11 +484,48 @@ class Trace(BaseModel):
     trace_id: UUID
     records: Dict[UUID, TraceRecord] = field(default_factory=dict)
 
+    root_record_id: UUID = None
+    invoked_at: datetime = datetime.max
+    finished_at: datetime = datetime.min
+
     def __str__(self) -> str:
         """
         Returns string representation of the trace.
         """
-        return f"{self.trace_id} ({len(self.records)} Records)"
+        return f"Trace: {self.trace_id} - {len(self.records)} Records"
+
+    @property
+    def duration(self) -> float:
+        """
+        Returns the duration in ms of the trace.
+        """
+        if not self.invoked_at or not self.finished_at:
+            return None
+
+        delta = self.finished_at - self.invoked_at
+        return delta.total_seconds() * 1e4
+
+    def add_record(self, record: Type[TraceRecord]) -> None:
+        """
+        Adds a record to the trace.
+
+        Updates the tracing context to set the trace ID correctly.
+        """
+        trace_ctx = record.tracing_context
+        func_ctx = record.function_context
+        if trace_ctx:
+            trace_ctx.trace_id = self.trace_id
+        else:
+            record.tracing_context = TracingContext(
+                trace_id=self.trace_id, record_id=uuid4())
+
+        if func_ctx and func_ctx.invoked_at:
+            self.invoked_at = min(self.invoked_at, func_ctx.invoked_at)
+
+        if func_ctx and func_ctx.finished_at:
+            self.finished_at = max(self.finished_at, func_ctx.finished_at)
+
+        self.records[record.tracing_context.record_id] = record
 
 
 """
@@ -501,6 +549,16 @@ class Profile(BaseModel):
         """
         return len(self.traces)
 
+
+    @property
+    def title(self) -> str:
+        """
+        Return the title of the profile
+        """
+        if not self.function_context:
+            return str(self.profile_id)
+        
+        return f"{self.function_context.function_key} ({str(self.profile_id)[:8]})"
 
 """
 Memory Measurement
