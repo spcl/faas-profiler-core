@@ -14,7 +14,7 @@ import marshmallow_dataclass
 
 from functools import partial, reduce
 from socket import AddressFamily
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from marshmallow import EXCLUDE, ValidationError, fields
 from marshmallow_dataclass import NewType
 from marshmallow_enum import EnumField
@@ -525,7 +525,8 @@ class MemoryLineUsage(BaseModel):
 @dataclass
 class MemoryUsage(BaseModel):
     interval: float
-    measuring_points: List[float] = field(default_factory=list)
+    # measuring_points: List[float] = field(default_factory=list)
+    measuring_points: List[Tuple[float, float]] = field(default_factory=list)
 
     @property
     def average(self) -> float:
