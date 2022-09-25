@@ -7,14 +7,11 @@ from __future__ import annotations
 
 import json
 
-import boto3
-from google.cloud import storage
-
 from abc import ABC, abstractproperty, abstractmethod
 from typing import Type
 from botocore.exceptions import ClientError
 from marshmallow import ValidationError
-from uuid import UUID
+from uuid import UUID, uuid4
 from os.path import basename, splitext
 
 from faas_profiler_core.logging import Loggable
@@ -146,7 +143,7 @@ class RecordStorage(ABC, Loggable):
         return self.number_of_unprocessed_records > 0
 
     @abstractmethod
-    def store_unprocessed_record(self, record: Type[TraceRecord]) -> None:
+    def store_unprocessed_record(self, trace_record: dict) -> None:
         """
         Stores a new unprocessed record
         """
@@ -174,6 +171,7 @@ class S3RecordStorage(RecordStorage):
 
     def __init__(self, bucket_name: str, region_name: str) -> None:
         super().__init__()
+        import boto3
 
         self.bucket_name = bucket_name
         self.region_name = region_name
@@ -315,13 +313,15 @@ class S3RecordStorage(RecordStorage):
                         f"Failed to deserialize {body}: {err}")
                     continue
 
-    def store_unprocessed_record(self, record: Type[TraceRecord]) -> None:
+    def store_unprocessed_record(self, trace_record: dict) -> None:
         """
         Stores a new unprocessed record
         """
+        _record_id = trace_record.get("tracing_context", {}).get(
+            "record_id", uuid4())
         _record_key = self.UNPROCESSED_RECORDS_FORMAT.format(
-            record_id=record.record_id)
-        record_json = safe_json_serialize(record.dump())
+            record_id=_record_id)
+        record_json = safe_json_serialize(trace_record)
 
         self.client.put_object(
             Bucket=self.bucket_name,
@@ -450,6 +450,7 @@ class GCPRecordStorage(RecordStorage):
         bucket_name: str
     ) -> None:
         super().__init__()
+        from google.cloud import storage
 
         self.project = project
         self.region_name = region_name
@@ -591,13 +592,15 @@ class GCPRecordStorage(RecordStorage):
         """
         return len(self.unprocessed_record_keys)
 
-    def store_unprocessed_record(self, record: Type[TraceRecord]) -> None:
+    def store_unprocessed_record(self, trace_record: dict) -> None:
         """
         Stores a new unprocessed record
         """
+        _record_id = trace_record.get("tracing_context", {}).get(
+            "record_id", uuid4())
         _record_key = self.UNPROCESSED_RECORDS_FORMAT.format(
-            record_id=str(record.record_id))
-        record_json = safe_json_serialize(record.dump())
+            record_id=_record_id)
+        record_json = safe_json_serialize(trace_record)
 
         record_blob = self.bucket.blob(_record_key)
         record_blob.upload_from_string(record_json)

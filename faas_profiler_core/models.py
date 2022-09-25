@@ -99,6 +99,14 @@ class BaseModel:
         unknown = EXCLUDE
 
     @classmethod
+    def valid(cls, data: Any) -> bool:
+        """
+        Checks if data is valid.
+        """
+        schema = marshmallow_dataclass.class_schema(cls)()
+        return schema.validate(data)
+
+    @classmethod
     def load(cls, data: Any):
         """
         Loads the dataclass based with data
@@ -239,14 +247,6 @@ class TracingContext(BaseModel):
 """
 Inbound and Outbound Context
 """
-
-STRONG = "strong"
-WEAK = "weak"
-
-
-@dataclass
-class Identifier:
-    type: Union[STRONG, WEAK]
 
 
 @dataclass
