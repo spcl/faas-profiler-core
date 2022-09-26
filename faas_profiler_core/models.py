@@ -10,7 +10,6 @@ Models and Schemas:
 """
 
 import marshmallow_dataclass
-import toastedmarshmallow
 
 from functools import partial
 from socket import AddressFamily
@@ -98,7 +97,6 @@ class BaseModel:
 
     class Meta:
         unknown = EXCLUDE
-        jit = toastedmarshmallow.Jit
 
     @classmethod
     def valid(cls, data: Any) -> bool:
