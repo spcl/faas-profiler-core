@@ -10,10 +10,11 @@ Models and Schemas:
 """
 
 import marshmallow_dataclass
+import toastedmarshmallow
 
 from functools import partial
 from socket import AddressFamily
-from typing import Any, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Type
 from marshmallow import EXCLUDE, ValidationError, fields
 from marshmallow_dataclass import NewType
 from marshmallow_enum import EnumField
@@ -97,6 +98,7 @@ class BaseModel:
 
     class Meta:
         unknown = EXCLUDE
+        jit = toastedmarshmallow.Jit
 
     @classmethod
     def valid(cls, data: Any) -> bool:
@@ -686,36 +688,27 @@ Captures
 @dataclass
 class S3AccessItem(BaseModel):
     mode: str
+    bucket_name: str
     object_key: str
-    object_sizes: List[int] = field(default_factory=dict)
-    execution_times: List[float] = field(default_factory=list)
-
+    object_size: float
+    execution_time: float
 
 @dataclass
-class S3Capture(BaseModel):
-    bucket_name: str
-    get_objects: List[S3AccessItem] = field(
-        default_factory=list)
-    create_objects: List[S3AccessItem] = field(
-        default_factory=list)
-    deleted_objects: List[S3AccessItem] = field(
-        default_factory=list)
-    head_objects: List[S3AccessItem] = field(
+class S3Accesses(BaseModel):
+    accesses: List[S3AccessItem] = field(
         default_factory=list)
 
 
 @dataclass
 class EFSAccessItem(BaseModel):
-    mode: InternalOperation
+    mode: str
     file: str
-    file_sizes: List[int] = field(default_factory=list)
-    execution_times: List[float] = field(default_factory=list)
+    file_size: float
+    execution_time: float
 
 
 @dataclass
-class EFSCapture(BaseModel):
+class EFSAccesses(BaseModel):
     mount_point: str
-    written_files: List[EFSAccessItem] = field(
-        default_factory=list)
-    read_files: List[EFSAccessItem] = field(
+    accesses: List[EFSAccessItem] = field(
         default_factory=list)
