@@ -271,6 +271,15 @@ class RequestContext(BaseModel):
         return "RequestContext: Provider={provider}, Service={service}, Operation={operation}, identifier={identifier}".format(
             provider=self.provider, service=self.service, operation=self.operation, identifier=self.identifier_string)
 
+    @property
+    def short_str(self) -> str:
+        """
+        Returns a short label for this context.
+        """
+        return "{service}::{operation}".format(
+            service=self.service.name,
+            operation=self.operation.value)
+
     def set_identifiers(self, identifiers: dict) -> None:
         """
         Merges identifier into stored identifier
@@ -403,6 +412,20 @@ class TraceRecord(BaseModel):
             record_str += " - ({:.2f} ms)".format(self.total_execution_time)
 
         return record_str
+
+    @property
+    def node_label(self) -> str:
+        """
+        Returns a label for this node.
+        """
+        _exe_time = "N/A"
+        if self.total_execution_time:
+            _exe_time = "{:.2f} ms".format(self.total_execution_time)
+
+        return "{name} [{record_id}] \n ({exe_time})".format(
+            name=self.record_name,
+            record_id=str(self.record_id)[:8],
+            exe_time=_exe_time)
 
     @property
     def function_key(self) -> str:
@@ -690,6 +713,7 @@ class S3AccessItem(BaseModel):
     object_key: str
     object_size: float
     execution_time: float
+
 
 @dataclass
 class S3Accesses(BaseModel):
