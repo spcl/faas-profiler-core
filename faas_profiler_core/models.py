@@ -605,7 +605,8 @@ class MemoryLineUsage(BaseModel):
 @dataclass
 class MemoryUsage(BaseModel):
     interval: float
-    measuring_points: List[Tuple[float, float]] = field(default_factory=list)
+    rss: List[Tuple[float, float]] = field(default_factory=list)
+    vms: List[Tuple[float, float]] = field(default_factory=list)
 
 
 """
@@ -615,8 +616,14 @@ CPU Measurement
 
 @dataclass
 class CPUUsage(BaseModel):
-    interval: float
-    measuring_points: List[Tuple[float, float]] = field(default_factory=list)
+    interval: float = None
+    percentage: List[Tuple[float, float]] = field(default_factory=list)
+
+
+@dataclass
+class CPUCoreUsage(BaseModel):
+    interval: float = None
+    percentage: List[List[Tuple[float, float]]] = field(default_factory=list)
 
 
 """
