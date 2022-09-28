@@ -623,7 +623,8 @@ class CPUUsage(BaseModel):
 @dataclass
 class CPUCoreUsage(BaseModel):
     interval: float = None
-    percentage: List[List[Tuple[float, float]]] = field(default_factory=list)
+    percentage: Dict[int, List[Tuple[float, float]]
+                     ] = field(default_factory=dict)
 
 
 """
