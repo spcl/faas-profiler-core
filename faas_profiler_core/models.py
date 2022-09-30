@@ -605,6 +605,8 @@ class MemoryLineUsage(BaseModel):
 @dataclass
 class MemoryUsage(BaseModel):
     interval: float
+    rss_baseline: float = 0.0
+    vms_baseline: float = 0.0
     rss: List[Tuple[float, float]] = field(default_factory=list)
     vms: List[Tuple[float, float]] = field(default_factory=list)
 
