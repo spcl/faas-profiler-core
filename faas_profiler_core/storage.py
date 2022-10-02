@@ -633,3 +633,28 @@ class GCPRecordStorage(RecordStorage):
 
         self.bucket.copy_blob(record_blob, self.bucket, _new_record_key)
         self.bucket.delete_blob(_record_key)
+
+    def store_graph_data(
+        self,
+        trace_id: UUID,
+        graph_data: dict
+    ) -> None:
+        """
+        Stores a graph pickle file.
+        """
+        graph_key = self.GRAPH_FORMAT.format(trace_id=str(trace_id))
+        record_blob = self.bucket.blob(graph_key)
+        record_blob.upload_from_string(safe_json_serialize(graph_data))
+
+    def get_graph_data(
+        self,
+        trace_id: UUID,
+    ) -> str:
+        """
+        Gets graph pickle
+        """
+        graph_key = self.GRAPH_FORMAT.format(trace_id=str(trace_id))
+        graph_blob = self.bucket.blob(graph_key)
+        graph_json = graph_blob.download_as_bytes()
+        return json.loads(graph_json.decode('utf-8'))
+        
