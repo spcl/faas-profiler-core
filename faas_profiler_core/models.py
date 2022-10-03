@@ -89,7 +89,9 @@ class OperationProxy(fields.Field):
 OperationType = NewType("OperationType", str, field=OperationProxy)
 
 
-@dataclass
+CACHED_SCHEMAS = {}
+
+
 class BaseModel:
     """
     Base model with method for loading and dumping.
@@ -103,23 +105,33 @@ class BaseModel:
         """
         Checks if data is valid.
         """
-        schema = marshmallow_dataclass.class_schema(cls)()
-        return schema.validate(data)
+        global CACHED_SCHEMAS
+        if cls not in CACHED_SCHEMAS:
+            CACHED_SCHEMAS[cls] = marshmallow_dataclass.class_schema(cls)()
+
+        return CACHED_SCHEMAS[cls].validate(data)
 
     @classmethod
     def load(cls, data: Any):
         """
         Loads the dataclass based with data
         """
-        schema = marshmallow_dataclass.class_schema(cls)()
-        return schema.load(data)
+        global CACHED_SCHEMAS
+        if cls not in CACHED_SCHEMAS:
+            CACHED_SCHEMAS[cls] = marshmallow_dataclass.class_schema(cls)()
+
+        return CACHED_SCHEMAS[cls].load(data)
 
     def dump(self) -> dict:
         """
         Dumps the dataclass to dict.
         """
-        schema = marshmallow_dataclass.class_schema(self.__class__)()
-        return schema.dump(self)
+        global CACHED_SCHEMAS
+        if self.__class__ not in CACHED_SCHEMAS:
+            CACHED_SCHEMAS[self.__class__] = marshmallow_dataclass.class_schema(
+                self.__class__)()
+
+        return CACHED_SCHEMAS[self.__class__].dump(self)
 
 
 """
