@@ -730,11 +730,11 @@ Captures
 
 @dataclass
 class S3AccessItem(BaseModel):
-    mode: str
-    bucket_name: str
-    object_key: str
-    object_size: float
-    execution_time: float
+    mode: str = None
+    bucket_name: str = None
+    object_key: str = None
+    object_size: float = None
+    execution_time: float = None
 
 
 @dataclass
@@ -745,10 +745,10 @@ class S3Accesses(BaseModel):
 
 @dataclass
 class EFSAccessItem(BaseModel):
-    mode: str
-    file: str
-    file_size: float
-    execution_time: float
+    mode: str = None
+    file: str = None
+    file_size: float = None
+    execution_time: float = None
 
 
 @dataclass
