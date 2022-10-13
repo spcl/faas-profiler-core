@@ -20,7 +20,7 @@ from enum import Enum
 from boto3.dynamodb.types import TypeSerializer, TypeDeserializer
 from botocore.exceptions import ClientError
 
-from .logging import Loggable
+from .utilis import Loggable
 from .models import BaseModel, RequestContext, InboundContext, TracingContext, OutboundContext
 from .constants import Provider
 

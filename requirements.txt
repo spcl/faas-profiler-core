@@ -10,3 +10,7 @@ typing-inspect==0.7.1
 marshmallow
 marshmallow_enum
 marshmallow_dataclass
+
+
+# Data management
+serpyco

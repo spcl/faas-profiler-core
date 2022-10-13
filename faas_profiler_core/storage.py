@@ -14,7 +14,7 @@ from marshmallow import ValidationError
 from uuid import UUID, uuid4
 from os.path import basename, splitext
 
-from faas_profiler_core.logging import Loggable
+from faas_profiler_core.utilis import Loggable
 from faas_profiler_core.models import Profile, Trace, TraceRecord
 
 
