@@ -32,6 +32,7 @@ FUNCTION_KEY_DELLIMITER = "::"
 KEY_VALUE_DELIMITER = "#"
 IDENTIFIER_DELIMITER = 2 * KEY_VALUE_DELIMITER
 
+
 @dataclass
 class BaseModel(serpyco.SerializerMixin):
     """
@@ -74,7 +75,7 @@ class FunctionContext(BaseModel):
     runtime: Runtime = Runtime.UNIDENTIFIED
     region: str = UNIDENTIFIED
     function_name: str = UNIDENTIFIED
-    
+
     handler: Optional[str] = UNIDENTIFIED
 
     # Timing Properties
@@ -157,6 +158,13 @@ class TracingContext(BaseModel):
         return "TracingContext: TraceID={trace_id}, RecordID={record_id}, ParentID={parent_id}".format(
             trace_id=self.trace_id, record_id=self.record_id, parent_id=self.parent_id)
 
+    @property
+    def is_defined(self) -> bool:
+        """
+        Returns True iff trace ID and record ID is not None
+        """
+        return self.trace_id is not None and self.record_id is not None
+
     def to_injectable(self) -> dict:
         """
         Returns the context as injectable context.
@@ -170,8 +178,6 @@ class TracingContext(BaseModel):
             ctx[PARENT_ID_HEADER] = str(self.parent_id)
 
         return ctx
-
-
 
 
 @dataclass
@@ -190,7 +196,7 @@ class RequestContext(BaseModel):
 
     provider: Provider
     service: Union[AWSService, GCPService, InternalService]
-    operation: Union[AWSOperation,GCPOperation, InternalOperation]
+    operation: Union[AWSOperation, GCPOperation, InternalOperation]
 
     trigger_synchronicity: TriggerSynchronicity = TriggerSynchronicity.UNIDENTIFIED
 
@@ -259,6 +265,13 @@ class RequestContext(BaseModel):
         """
         return self.identifier is not None and self.identifier != {}
 
+    @property
+    def is_defined(self) -> bool:
+        """
+        Returns True if provider and service is not undefined
+        """
+        return (self.provider != Provider.UNIDENTIFIED
+                and self.operation.value != UNIDENTIFIED)
 
 
 @dataclass
@@ -266,7 +279,7 @@ class InboundContext(RequestContext):
     """
     Context definition for inbound requests
     """
-    pass
+    invoked_at: Optional[datetime] = None
 
 
 @dataclass
@@ -274,10 +287,11 @@ class OutboundContext(RequestContext):
     """
     Context definition for outbound requests
     """
-    finished_at: Optional[datetime] = None
+    called_at: Optional[datetime] = None
+    returned_at: Optional[datetime] = None
 
     has_error: bool = False
-    error_message: str = ""
+    error_message: str = None
 
 
 """
@@ -290,8 +304,6 @@ class RecordData(BaseModel):
     name: str
     type: RecordDataType
     results: Any
-
-
 
 
 @dataclass
@@ -396,7 +408,6 @@ class TraceRecord(BaseModel):
             return
 
         return self.function_context.handler_execution_time
-
 
 
 """
