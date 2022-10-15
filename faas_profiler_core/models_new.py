@@ -2,23 +2,21 @@
 import serpyco
 
 from dataclasses import dataclass, field
-from typing import Optional, Union, Dict, Tuple, List, Any
+from typing import Optional, Dict, Tuple, List, Any
 from datetime import datetime
 from uuid import UUID
 from socket import AddressFamily
 
 from .utilis import sec_to_ms
 from .constants import (
-    AWSOperation,
-    AWSService,
-    GCPOperation,
-    GCPService,
-    InternalService,
+    Operation,
     RecordDataType,
-    InternalOperation,
     Provider,
     Runtime,
+    Service,
     TriggerSynchronicity,
+    UnidentifiedOperation,
+    UnidentifiedService,
     operation_proxy,
     service_proxy,
     TRACE_ID_HEADER,
@@ -194,9 +192,9 @@ class RequestContext(BaseModel):
     #     "tags",
     #     "latency")
 
-    provider: Provider
-    service: Union[AWSService, GCPService, InternalService]
-    operation: Union[AWSOperation, GCPOperation, InternalOperation]
+    provider: Provider = Provider.UNIDENTIFIED
+    service: Service = UnidentifiedService.UNIDENTIFIED
+    operation: Operation = UnidentifiedOperation.UNIDENTIFIED
 
     trigger_synchronicity: TriggerSynchronicity = TriggerSynchronicity.UNIDENTIFIED
 

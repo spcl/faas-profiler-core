@@ -59,12 +59,14 @@ class Service(Enum):
     """
     Base class for provider services
     """
+    pass
 
 
 class Operation(Enum):
     """
     Base class for operations on provider services.
     """
+    pass
 
 
 class TriggerSynchronicity(Enum):
