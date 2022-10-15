@@ -1,15 +1,15 @@
 # AWS SDK
 boto3
 
-# # GCP storage SDK
+# GCP storage SDK
 google-cloud-storage
 
-typing-inspect==0.7.1
+typing-inspect
 
-# Data management
-marshmallow
-marshmallow_enum
-marshmallow_dataclass
+# # Data management
+# marshmallow
+# marshmallow_enum
+# marshmallow_dataclass
 
 
 # Data management
